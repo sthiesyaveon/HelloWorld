@@ -1,0 +1,43 @@
+{
+    "name": "helloworld",
+    "startupObjectId":  22,
+    "startupObjectType":  "Page",
+    "breakOnError":  true,
+    "navContainerHelperPath": "$HOME\\Documents\\GitHub\\Microsoft\\navcontainerhelper\\navcontainerhelper.ps1",
+     "versions": [
+        {
+            "version": "current",
+            "containerImage": "microsoft/bcsandbox:us",
+            "alwaysPull": false
+        },
+        {
+            "version": "nextminor",
+            "containerImage": "bcinsider.azurecr.io/bcsandbox:us",
+            "alwaysPull": true
+        },
+        {
+            "version": "nextmajor",
+            "containerImage": "bcinsider.azurecr.io/bcsandbox-master:us",
+            "alwaysPull": true
+        }
+    ],
+    "profiles": [
+        {
+            "profile": "freddyk",
+            "subscriptionId": "97d6b765-89fc-40e9-b253-baee2b19d6db",
+            "environment": "AzureCloud",
+            "keyVault": "BuildVariables",
+            "templateUri": "https://raw.githubusercontent.com/microsoft/nav-arm-templates/dev/getbcext.json",
+            "resourceGroup": "HelloWorldFreddyK",
+            "location": "West Europe",
+            "domain": "westeurope.cloudapp.azure.com",
+            "Properties": {
+                "accepteula": "Yes",
+                "remotedesktopaccess": "-",
+                "vmName": "helloworld-fk",
+                "vmSize": "Standard_D2_v3",
+                "contactemailforletsencrypt": "fk@freddy.dk"
+            }
+        }
+    ]
+}

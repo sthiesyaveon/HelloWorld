@@ -1,0 +1,23 @@
+{
+  "id": "ee2a579e-3f3a-45c7-8936-976e4e889bbe",
+  "name": "HelloWorld-App",
+  "publisher": "Default Publisher",
+  "brief": "",
+  "description": "Simple Hello World App",
+  "version": "1.0.0.0",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "capabilities": [],
+  "dependencies": [],
+  "screenshots": [],
+  "platform": "13.0.0.0",
+  "application": "13.0.0.0",
+  "idRange": {
+    "from": 50100,
+    "to": 50149
+  },
+  "runtime": "2.0"
+}
