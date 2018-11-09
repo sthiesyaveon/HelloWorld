@@ -16,10 +16,10 @@ if ($run -eq "Local" -and $navContainerHelperPath -ne "" -and (Test-Path $navCon
     if ($module) {
         $versionStr = $module.Version.ToString()
         Write-Host "NavContainerHelper $VersionStr is installed"
-        Write-Host "Determine latest available NavContainerHelper version"
+        Write-Host "Determine latest NavContainerHelper version"
         $latestVersion = (Find-Module -Name navcontainerhelper).Version
         $latestVersionStr = $latestVersion.ToString()
-        Write-Host "NavContainerHelper $latestVersionStr is available"
+        Write-Host "NavContainerHelper $latestVersionStr is the latest version"
         if ($latestVersion -gt $module.Version) {
             Write-Host "Updating NavContainerHelper to $latestVersionStr"
             Update-Module -Name navcontainerhelper -Force -RequiredVersion $latestVersionStr

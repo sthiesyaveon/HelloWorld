@@ -1,9 +1,9 @@
 {
-  "id": "c5feaa41-48be-4a28-867a-c097173f1a4f",
-  "name": "HelloWorld-Test",
+  "id": "<test app id>",
+  "name": "<test app name>",
   "publisher": "Default Publisher",
   "brief": "",
-  "description": "Empty Test App",
+  "description": "",
   "version": "1.0.0.0",
   "privacyStatement": "",
   "EULA": "",
@@ -13,10 +13,10 @@
   "capabilities": [],
   "dependencies": [
     {
-      "name": "HelloWorld-App",
+      "name": "<app name>",
       "publisher": "Default Publisher",
       "version": "1.0.0.0",
-      "appId": "ee2a579e-3f3a-45c7-8936-976e4e889bbe"
+      "appId": "<app id>"
     }
   ],
   "screenshots": [],

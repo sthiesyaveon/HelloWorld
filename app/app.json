@@ -1,9 +1,9 @@
 {
-  "id": "ee2a579e-3f3a-45c7-8936-976e4e889bbe",
-  "name": "HelloWorld-App",
+  "id": "<app id>",
+  "name": "<app name>",
   "publisher": "Default Publisher",
   "brief": "",
-  "description": "Simple Hello World App",
+  "description": "",
   "version": "1.0.0.0",
   "privacyStatement": "",
   "EULA": "",

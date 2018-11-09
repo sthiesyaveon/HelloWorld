@@ -23,6 +23,7 @@ $parameters = @{
 if ($run -eq "Local") {
     $workspaceFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
     $additionalParameters = @("--volume ""${workspaceFolder}:C:\Source""") 
+    $myscripts = @()
     $shortcuts = "Desktop"
 } else {
     $additionalParameters = @("--volume ""C:\Agent:C:\Agent""", "--env httpSite=N", "--env WebClient=N")

@@ -23,20 +23,20 @@
     ],
     "profiles": [
         {
-            "profile": "freddyk",
-            "subscriptionId": "97d6b765-89fc-40e9-b253-baee2b19d6db",
+            "profile": "<user id>",
+            "subscriptionId": "<subscription id>",
             "environment": "AzureCloud",
-            "keyVault": "BuildVariables",
+            "keyVault": "<key vault>",
             "templateUri": "https://raw.githubusercontent.com/microsoft/nav-arm-templates/dev/getbcext.json",
-            "resourceGroup": "HelloWorldFreddyK",
-            "location": "West Europe",
-            "domain": "westeurope.cloudapp.azure.com",
+            "resourceGroup": "<resource group name>",
+            "location": "<location>",
+            "domain": "<locationurl>.cloudapp.azure.com",
             "Properties": {
                 "accepteula": "Yes",
                 "remotedesktopaccess": "-",
-                "vmName": "helloworld-fk",
+                "vmName": "<vm name>",
                 "vmSize": "Standard_D2_v3",
-                "contactemailforletsencrypt": "fk@freddy.dk"
+                "contactemailforletsencrypt": "<email>"
             }
         }
     ]
