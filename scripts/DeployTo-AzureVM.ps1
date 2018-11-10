@@ -8,11 +8,11 @@
     [Parameter(Mandatory=$true)]
     [pscredential] $credential,
     [Parameter(Mandatory=$true)]
-    [string] $profile = "freddyk",
+    [string] $profile,
     [string] $AppUrl
 )
 
-$settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
+$settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
 $imageversion = $settings.versions | Where-Object { $_.version -eq $version }
 $azureprofile = $settings.profiles | Where-Object { $_.profile -eq $profile }
 if (!($azureprofile)) {

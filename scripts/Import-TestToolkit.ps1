@@ -10,6 +10,6 @@ Param(
     [switch]$includeTestCodeUnits
 )
 
-$settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
+$settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
 $containerName = "$($settings.name)-$type"
 Import-TestToolkitToNavContainer -containerName $containerName -sqlCredential $credential -includeTestLibrariesOnly:(!$includeTestCodeUnits)

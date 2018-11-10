@@ -3,7 +3,7 @@
     [string] $run = "AzureDevOps"
 )
 
-$settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
+$settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
 $navContainerHelperPath = ""
 if ($settings.PSObject.Properties.name -match "navContainerHelperPath") {
     $navContainerHelperPath = $settings.navContainerHelperPath.Replace('$HOME',"$HOME")

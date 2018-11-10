@@ -10,7 +10,7 @@
     [SecureString] $licenseFile = $null
 )
 
-$settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
+$settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
 $imageversion  = $settings.versions | Where-Object { $_.version -eq $version }
 $containerName = "$($settings.name)-$type"
 Write-Host "Create $containerName from $($imageversion.containerImage)"

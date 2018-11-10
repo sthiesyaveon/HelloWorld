@@ -13,7 +13,7 @@
 
 # Run Test is a temp solution
 
-$settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
+$settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
 $containerName = "$($settings.name)-$type"
 $TempTestResultFile = "C:\ProgramData\NavContainerHelper\Extensions\$containerName\Test Results.xml"
 Invoke-NavContainerCodeunit -containerName $containerName -Codeunitid $settings.TestCodeunitId -CompanyName $settings.TestCompanyName -Argument $TempTestResultFile -MethodName $settings.TestMethodName -TimeZone UTC

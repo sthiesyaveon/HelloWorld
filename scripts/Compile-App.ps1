@@ -16,7 +16,7 @@ Param(
     [switch]$updateSymbols
 )
 
-$settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
+$settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
 $containerName = "$($settings.name)-$type"
 $appFolders | ForEach-Object {
     Compile-AppInNavContainer -containerName $containerName -credential $credential -appProjectFolder (Join-Path $buildProjectFolder $_) -appOutputFolder (Join-Path $buildArtifactFolder $_) -UpdateSymbols:$updateSymbols -AzureDevOps:($run -eq "AzureDevOps") | Out-Null

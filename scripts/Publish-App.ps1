@@ -14,7 +14,7 @@
     [switch] $skipVerification
 )
 
-$settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
+$settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
 $containerName = "$($settings.name)-$type"
 $appFolders | ForEach-Object {
     Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) | ForEach-Object {
