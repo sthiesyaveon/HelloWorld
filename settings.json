@@ -3,7 +3,7 @@
     "startupObjectId":  22,
     "startupObjectType":  "Page",
     "breakOnError":  true,
-    "navContainerHelperPath": "$HOME\\Documents\\GitHub\\Microsoft\\navcontainerhelper\\navcontainerhelper.ps1",
+    "navContainerHelperPath": "",
      "versions": [
         {
             "version": "current",
@@ -23,14 +23,14 @@
     ],
     "profiles": [
         {
-            "profile": "<user id>",
+            "profile": "Default",
             "subscriptionId": "<subscription id>",
             "environment": "AzureCloud",
             "keyVault": "<key vault>",
             "templateUri": "https://raw.githubusercontent.com/microsoft/nav-arm-templates/dev/getbcext.json",
             "resourceGroup": "<resource group name>",
-            "location": "<location>",
-            "domain": "<locationurl>.cloudapp.azure.com",
+            "location": "West Europe",
+            "domain": "westeurope.cloudapp.azure.com",
             "Properties": {
                 "accepteula": "Yes",
                 "remotedesktopaccess": "-",
