@@ -24,16 +24,16 @@ Import-Module -Name "AzureRM.Compute"
 
 try {
     if ((Get-AzureRmContext).Subscription.Id -ne $azureprofile.subscriptionId) {
-        Set-AzureRmContext -SubscriptionID $azureprofile.subscriptionId
+        Set-AzureRmContext -SubscriptionID $azureprofile.subscriptionId | Out-Null
     }
 } catch {
-    Add-AzureRmAccount -Environment $azureprofile.environment
-    Set-AzureRmContext -SubscriptionID $azureprofile.subscriptionId
+    Add-AzureRmAccount -Environment $azureprofile.environment | Out-Null
+    Set-AzureRmContext -SubscriptionID $azureprofile.subscriptionId | Out-Null
 }
 
 if (Get-AzureRmResourceGroup -name $azureprofile.resourceGroup -ErrorAction Ignore) {
     Write-Host "Removing $($azureprofile.resourceGroup)"
-    Remove-AzureRmResourceGroup -Name $azureprofile.resourceGroup -force -Erroraction Ignore
+    Remove-AzureRmResourceGroup -Name $azureprofile.resourceGroup -force -Erroraction Ignore | Out-Null
 }
 
 # ARM template

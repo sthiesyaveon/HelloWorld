@@ -27,7 +27,7 @@
             "subscriptionId": "<subscription id>",
             "environment": "AzureCloud",
             "keyVault": "<key vault>",
-            "templateUri": "https://raw.githubusercontent.com/microsoft/nav-arm-templates/dev/getbcext.json",
+            "templateUri": "",
             "resourceGroup": "<resource group name>",
             "location": "West Europe",
             "domain": "westeurope.cloudapp.azure.com",

@@ -5,7 +5,7 @@
 
 $settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
 $navContainerHelperPath = ""
-if ($settings.PSObject.Properties.name -match "navContainerHelperPath") {
+if ($settings.PSObject.Properties.name -eq "navContainerHelperPath") {
     $navContainerHelperPath = $settings.navContainerHelperPath.Replace('$HOME',"$HOME")
 }
 if ($run -eq "Local" -and $navContainerHelperPath -ne "" -and (Test-Path $navContainerHelperPath)) {

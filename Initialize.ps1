@@ -14,13 +14,13 @@
     
     $settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
     
-    if ($settings.PSObject.Properties.name -match "startupObjectId") {
+    if ($settings.PSObject.Properties.name -eq "startupObjectId") {
         $launchSettings += @{ "startupObjectId" = $settings.startupObjectId }
     }
-    if ($settings.PSObject.Properties.name -match "startupObjectType") {
+    if ($settings.PSObject.Properties.name -eq "startupObjectType") {
         $launchSettings += @{ "startupObjectType" = $settings.startupObjectType }
     }
-    if ($settings.PSObject.Properties.name -match "breakOnError") {
+    if ($settings.PSObject.Properties.name -eq "breakOnError") {
         $launchSettings += @{ "breakOnError" = $settings.breakOnError }
     }
     
@@ -42,14 +42,21 @@ $ScriptRoot = $PSScriptRoot
 
 $settings = (Get-Content (Join-Path $ScriptRoot "settings.json") | ConvertFrom-Json)
 
-$version = Read-Host ("Select Version (" +(($settings.versions | ForEach-Object { $_.version }) -join ", ") + ") ")
+$defaultVersion = $settings.versions[0].version
+$version = Read-Host ("Select Version (" +(($settings.versions | ForEach-Object { $_.version }) -join ", ") + ") (default $defaultVersion)")
 if (!($version)) {
-    $version = $settings.versions[0].version
+    $version = $defaultVersion
 }
 
-$profile = Read-Host ("Select profile (" +(($settings.profiles | ForEach-Object { $_.profile }) -join ", ") + ") ")
-if (!($profile)) {
-    $profile = $settings.profiles[0].profile
+$defaultProfile = $settings.profiles | Where-Object { $_.profile -eq $env:USERNAME }
+if (!($defaultProfile)) {
+    $defaultProfile = $settings.profiles | Where-Object { $_.profile -eq "default" }
+}
+if ($defaultProfile) {
+    $profile = $defaultProfile.profile
+} else {
+    $defaultProfile = $settings.profiles[0]
+    $profile = Read-Host ("Select profile (" +(($settings.profiles | ForEach-Object { $_.profile }) -join ", ") + ") (default $($defaultProfile.profile))")
 }
 
 $imageversion = $settings.versions | Where-Object { $_.version -eq $version }
@@ -74,7 +81,7 @@ try {
     Set-AzureRmContext -SubscriptionID $azureprofile.subscriptionId
 }
 
-$licenseFileSecret = (Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "LicenseFile").SecretValue
+$licenseFileSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "LicenseFile"
 $pfxFileSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "CodeSignPfxFile"
 $pfxPasswordSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "CodeSignPfxPassword"
 $usernameSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "Username"

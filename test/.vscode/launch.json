@@ -1,29 +1,5 @@
 {
     "version":  "0.2.0",
     "configurations":  [
-                           {
-                               "type":  "al",
-                               "request":  "launch",
-                               "name":  "Local DevEnv",
-                               "server":  "http://helloworld-dev",
-                               "serverInstance":  "NAV",
-                               "tenant":  "",
-                               "authentication":  "UserPassword",
-                               "startupObjectId":  22,
-                               "startupObjectType":  "Page",
-                               "breakOnError":  true
-                           },
-                           {
-                               "type":  "al",
-                               "request":  "launch",
-                               "name":  "AzureVM DevEnv",
-                               "server":  "https://helloworld-dev.westeurope.cloudapp.azure.com",
-                               "serverInstance":  "NAV",
-                               "tenant":  "",
-                               "authentication":  "UserPassword",
-                               "startupObjectId":  22,
-                               "startupObjectType":  "Page",
-                               "breakOnError":  true
-                           }
                        ]
 }
