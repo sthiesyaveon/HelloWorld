@@ -1,0 +1,91 @@
+resources:
+- repo: self
+
+variables:
+  version: 'current'
+
+steps:
+- task: PowerShell@2
+  displayName: 'Install NavContainerHelper'
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Install-NavContainerHelper.ps1'
+
+- task: PowerShell@2
+  displayName: 'Create Build Container'
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Create-Container.ps1'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -licenseFile "$(LicenseFile)"'
+
+- task: PowerShell@2
+  displayName: 'Compile App'
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Compile-App.ps1'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app")'
+    failOnStderr: true
+
+- task: PowerShell@2
+  displayName: 'Sign App'
+  condition: and(ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Sign-App.ps1'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -PfxFile (ConvertTo-SecureString -String "$(CodeSignPfxFile)" -AsPlainText -Force) -PfxPassword (ConvertTo-SecureString -String "$(CodeSignPfxPassword)" -AsPlainText -Force)'
+
+- task: PowerShell@2
+  displayName: 'Publish App'
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Publish-App.ps1'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -skipVerification:("$(CodeSignPfxFile)$(CodeSignPfxPassword)" -eq "")'
+
+- task: PowerShell@2
+  displayName: 'Import TestToolkit'
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Import-TestToolkit.ps1'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force)))'
+
+- task: PowerShell@2
+  displayName: 'Compile Test App'
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Compile-App.ps1'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("test")'
+    failOnStderr: true
+
+- task: PowerShell@2
+  displayName: 'Publish Test App'
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Publish-App.ps1'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("test") -skipVerification'
+
+- task: PowerShell@2
+  displayName: 'Run Tests'
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Run-Tests.ps1'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -TestResultsFile (Join-Path "$(System.DefaultWorkingDirectory)" "TestResults.xml") -test "unittests"'
+  
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results'
+  inputs:
+    testResultsFormat: XUnit
+    testResultsFiles: TestResults.xml
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: app'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)\app'
+    ArtifactName: app
+
+- task: PowerShell@2
+  displayName: 'Remove Build Container'
+  condition: always()
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Remove-Container.ps1'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force)))'

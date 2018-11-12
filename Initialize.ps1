@@ -82,8 +82,8 @@ try {
 }
 
 $licenseFileSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "LicenseFile"
-$pfxFileSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "CodeSignPfxFile"
-$pfxPasswordSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "CodeSignPfxPassword"
+$CodeSignPfxFileSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "CodeSignPfxFile"
+$CodeSignPfxPasswordSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "CodeSignPfxPassword"
 $usernameSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "Username"
 $passwordSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "Password"
 
@@ -93,3 +93,6 @@ if (($usernameSecret) -and ($passwordSecret)) {
     throw "Username and Password secrets should be set in the Azure KeyVault"
 }
 
+if (!($licenseFileSecret)) {
+    throw "License File secret should be set in the Azure KeyVault"
+}
