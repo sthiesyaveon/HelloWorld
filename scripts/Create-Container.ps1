@@ -7,7 +7,7 @@
     [string] $type = "bld",
     [Parameter(Mandatory=$true)]
     [pscredential] $credential,
-    [SecureString] $licenseFile = $null
+    [String] $licenseFile = ""
 )
 
 $settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
@@ -31,11 +31,6 @@ if ($run -eq "Local") {
     $shortcuts = "None"
 }
 
-$licenseFileParam = ""
-if ($licenseFile) {
-    $licenseFileParam = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFile))
-}
-
 New-NavContainer @parameters `
                  -containerName $containerName `
                  -imageName $imageversion.containerImage `
@@ -48,6 +43,6 @@ New-NavContainer @parameters `
                  -enableSymbolLoading `
                  -useBestContainerOS `
                  -shortcuts $shortcuts `
-                 -licenseFile $licenseFileParam `
+                 -licenseFile "$licenseFile" `
                  -additionalParameters $additionalParameters `
                  -myScripts $myscripts
