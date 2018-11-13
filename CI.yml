@@ -1,10 +1,21 @@
 resources:
 - repo: self
 
-variables:
-  version: 'current'
-
 steps:
+- task: PowerShell@2
+  displayName: 'Defaulting container version'
+  inputs:
+    errorActionPreference: silentlyContinue
+    targetType: inline
+    script: 'if ("$(version)" -eq "")  { Write-Host "Version not defined, using current container version"; Write-Host "##vso[task.setvariable variable=version]current" } else { Write-Host "Using $(version) container version" }'
+
+- task: PowerShell@2
+  displayName: 'Login to bcinsider repository'
+  condition: and(succeeded(),or(eq(variables['version'],'nextminor'),eq(variables['version'],'nextmajor')))
+  inputs:
+    targetType: inline
+    script: 'docker login "bcinsider.azurecr.io" -u "$(bcInsiderUsername)" -p "$(bcinsiderPassword)"'
+
 - task: PowerShell@2
   displayName: 'Install NavContainerHelper'
   inputs:
@@ -28,7 +39,7 @@ steps:
 
 - task: PowerShell@2
   displayName: 'Sign App'
-  condition: and(ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
+  condition: and(succeeded(),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
   inputs:
     targetType: filePath
     filePath: 'scripts\Sign-App.ps1'
