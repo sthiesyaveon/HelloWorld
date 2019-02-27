@@ -28,7 +28,7 @@ if ($run -eq "Local") {
 } else {
     $segments = "$PSScriptRoot".Split('\')
     $rootFolder = "$($segments[0])\$($segments[1])"
-    $additionalParameters = @("--volume ""$($rootFolder):C:\Agent""", "--env httpSite=N", "--env WebClient=N")
+    $additionalParameters = @("--volume ""$($rootFolder):C:\Agent""")
     $myscripts = @(@{'MainLoop.ps1' = 'while ($true) { start-sleep -seconds 10 }'})
     $shortcuts = "None"
 }
