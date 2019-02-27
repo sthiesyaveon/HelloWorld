@@ -26,6 +26,10 @@ if ($run -eq "Local" -and $navContainerHelperPath -ne "" -and (Test-Path $navCon
             Write-Host "NavContainerHelper updated"
         }
     } else {
+        if (!(Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction Ignore)) {
+            Write-Host "Installing NuGet Package Provider"
+            Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.208 -Force -WarningAction Ignore | Out-Null
+        }
         Write-Host "Installing NavContainerHelper"
         Install-Module -Name navcontainerhelper -Force
         $module = Get-InstalledModule -Name navcontainerhelper -ErrorAction Ignore
