@@ -1,6 +1,6 @@
 codeunit 50130 "Test Suite"
 {
-    procedure Create(TestSuiteName: code[10]; TestCodeunitFilter: Text)
+    procedure Create(TestSuiteName: code[10]; TestCodeunitFilter: Text; EmptyTestSuite: Boolean)
     var
         CALTestLine: Record "CAL Test Line";
         TempAllObjWithCaption: Record AllObjWithCaption temporary;
@@ -8,7 +8,8 @@ codeunit 50130 "Test Suite"
         TryInsertTestSuite(TestSuiteName);
 
         CALTestLine.SETRANGE("Test Suite", TestSuiteName);
-        CALTestLine.DELETEALL(TRUE);
+        IF EmptyTestSuite THEN
+            CALTestLine.DELETEALL(TRUE);
 
         IF GetTestCodeunits(TestCodeunitFilter, TempAllObjWithCaption) THEN
             RefreshSuite(TestSuiteName, TempAllObjWithCaption);
