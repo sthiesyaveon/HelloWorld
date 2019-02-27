@@ -79,7 +79,7 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Run-Tests.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -TestResultsFile (Join-Path "$(System.DefaultWorkingDirectory)" "TestResults.xml") -test "unittests"'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -TestResultsFile (Join-Path "$(System.DefaultWorkingDirectory)" "TestResults.xml") -testsuite "DEFAULT"'
   
 - task: PublishTestResults@2
   displayName: 'Publish Test Results'

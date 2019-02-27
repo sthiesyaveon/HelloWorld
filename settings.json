@@ -4,16 +4,7 @@
     "startupObjectType":  "Page",
     "breakOnError":  true,
     "navContainerHelperPath": "",
-    "tests": [
-        {
-            "test": "unittests",
-            "type": "Codeunit",
-            "companyName": "CRONUS USA, Inc.",
-            "codeunitId": "50130",
-            "methodName": "RunTests"
-        }
-    ],
-     "versions": [
+    "versions": [
         {
             "version": "current",
             "containerImage": "microsoft/bcsandbox:us",

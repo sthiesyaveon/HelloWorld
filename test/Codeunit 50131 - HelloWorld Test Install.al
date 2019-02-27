@@ -6,6 +6,6 @@ codeunit 50131 "HelloWorld Test Install"
     var
         TestSuite: Codeunit "Test Suite";
     begin
-        TestSuite.Create('HelloWorld', '50132..50132');
+        TestSuite.Create('DEFAULT', '50132..50132');
     end;
 }
