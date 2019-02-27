@@ -1,4 +1,4 @@
-codeunit 50131 "HelloWorld Tests"
+codeunit 50132 "HelloWorld Tests"
 {
     Subtype = Test;
     TestPermissions = Disabled;
