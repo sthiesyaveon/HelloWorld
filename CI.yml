@@ -90,6 +90,7 @@ steps:
   inputs:
     testResultsFormat: XUnit
     testResultsFiles: TestResults.xml
+    failTaskOnFailedTests: false
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: app'
