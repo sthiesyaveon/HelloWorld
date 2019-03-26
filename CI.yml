@@ -1,3 +1,7 @@
+variables:
+  build.clean: all
+  platform: x64
+
 resources:
 - repo: self
 
