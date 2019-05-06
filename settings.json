@@ -7,7 +7,7 @@
     "versions": [
         {
             "version": "current",
-            "containerImage": "microsoft/bcsandbox:us",
+            "containerImage": "mcr.microsoft.com/businesscentral/onprem:w1-ltsc2019",
             "alwaysPull": false
         },
         {
