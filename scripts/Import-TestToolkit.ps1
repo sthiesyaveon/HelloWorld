@@ -1,15 +1,16 @@
 Param(
-    [ValidateSet('AzureDevOps','Local')]
+    [ValidateSet('AzureDevOps','Local','AzureVM')]
+    [Parameter(Mandatory=$false)]
     [string] $run = "AzureDevOps",
-    [ValidateSet('current','nextminor','nextmajor')]
-    [string] $version = "current",
-    [ValidateSet('bld','dev')]
-    [string] $type = "bld",
+
+    [Parameter(Mandatory=$true)]
+    [string] $containerName,
+    
     [Parameter(Mandatory=$true)]
     [pscredential] $credential,
-    [switch]$includeTestCodeUnits
+    
+    [switch] $includeTestCodeUnits
 )
 
-$settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
-$containerName = "$($settings.name)-$type"
 Import-TestToolkitToNavContainer -containerName $containerName -sqlCredential $credential -includeTestLibrariesOnly:(!$includeTestCodeUnits)
+

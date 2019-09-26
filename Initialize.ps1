@@ -1,30 +1,82 @@
-﻿Function UpdateLaunchJson {
+﻿$ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
+$ScriptRoot = $PSScriptRoot
+
+$settings = (Get-Content (Join-Path $ScriptRoot "settings.json") | ConvertFrom-Json)
+
+$defaultVersion = $settings.versions[0].version
+$version = Read-Host ("Select Version (" +(($settings.versions | ForEach-Object { $_.version }) -join ", ") + ") (default $defaultVersion)")
+if (!($version)) {
+    $version = $defaultVersion
+}
+
+$defaultUserProfile = $settings.userProfiles | Where-Object { $_.profile -eq "$($env:COMPUTERNAME)\$($env:USERNAME)" }
+if (!($defaultUserProfile)) {
+    $defaultUserProfile = $settings.userProfiles | Where-Object { $_.profile -eq $env:USERNAME }
+    if (!($defaultUserProfile)) {
+        $defaultUserProfile = $settings.userProfiles | Where-Object { $_.profile -eq "default" }
+    }
+}
+
+if ($defaultUserProfile) {
+    $profile = $defaultUserProfile.profile
+}
+else {
+    $defaultUserProfile = $settings.userProfiles[0]
+    $profile = Read-Host ("Select User Profile (" +(($settings.userProfiles | ForEach-Object { $_.profile }) -join ", ") + ") (default $($defaultUserProfile.profile))")
+}
+
+$userProfile = $settings.userProfiles | Where-Object { $_.profile -eq $profile }
+$imageversion = $settings.versions | Where-Object { $_.version -eq $version }
+if (!($imageversion)) {
+    throw "No version for $version in settings.json"
+}
+
+if ($userProfile.licenseFilePath) {
+    $licenseFile = $userProfile.licenseFilePath | ConvertTo-SecureString
+}
+else {
+    $licenseFile = $null
+}
+$credential = New-Object PSCredential($userProfile.Username, ($userProfile.Password | ConvertTo-SecureString))
+$CodeSignPfxFile = $null
+if (($userProfile.PSObject.Properties.name -eq "CodeSignPfxFilePath") -and ($userProfile.PSObject.Properties.name -eq "CodeSignPfxPassword")) {
+    $CodeSignPfxFile = ConvertTo-SecureString -string $userProfile.CodeSignPfxFilePath -AsPlainText -Force
+    $CodeSignPfxPassword = $userProfile.CodeSignPfxPassword | ConvertTo-SecureString
+}
+
+Function UpdateLaunchJson {
     Param(
         [string] $Name,
-        [string] $Server
+        [string] $Server,
+        [int] $Port = 7049,
+        [string] $ServerInstance = "NAV"
     )
     
     $launchSettings = [ordered]@{ "type" = "al";
                                   "request" = "launch";
                                   "name" = "$Name"; 
-                                  "server" = "$Server";
-                                  "serverInstance" = "NAV"; 
-                                  "tenant" = ""; 
-                                  "authentication" =  "UserPassword" }
-    
-    $settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
-    
-    if ($settings.PSObject.Properties.name -eq "startupObjectId") {
-        $launchSettings += @{ "startupObjectId" = $settings.startupObjectId }
-    }
-    if ($settings.PSObject.Properties.name -eq "startupObjectType") {
-        $launchSettings += @{ "startupObjectType" = $settings.startupObjectType }
-    }
-    if ($settings.PSObject.Properties.name -eq "breakOnError") {
-        $launchSettings += @{ "breakOnError" = $settings.breakOnError }
+                                  "server" = "$Server"
+                                  "serverInstance" = $serverInstance
+                                  "port" = $Port
+                                  "tenant" = ""
+                                  "authentication" =  "UserPassword"
     }
     
-    Get-ChildItem $PSScriptRoot -Directory | ForEach-Object {
+    $settings = (Get-Content (Join-Path $ScriptRoot "settings.json") | ConvertFrom-Json)
+    
+    $settings.launch.PSObject.Properties | % {
+        $setting = $_
+        $launchSetting = $launchSettings.GetEnumerator() | Where-Object { $_.Name -eq $setting.Name }
+        if ($launchSetting) {
+            $launchSettings[$_.Name] = $_.Value
+        }
+        else {
+            $launchSettings += @{ $_.Name = $_.Value }
+        }
+    }
+    
+    Get-ChildItem $ScriptRoot -Directory | ForEach-Object {
         $folder = $_.FullName
         $launchJsonFile = Join-Path $folder ".vscode\launch.json"
         if (Test-Path $launchJsonFile) {
@@ -37,62 +89,115 @@
     }
 }
 
-$ErrorActionPreference = "Stop"
-$ScriptRoot = $PSScriptRoot
+function InvokeScriptInSession {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [System.Management.Automation.Runspaces.PSSession] $session,
+        [Parameter(Mandatory=$true)]
+        [string] $filename,
+        [Parameter(Mandatory=$false)]
+        [object[]] $argumentList
+    )
 
-$settings = (Get-Content (Join-Path $ScriptRoot "settings.json") | ConvertFrom-Json)
-
-$defaultVersion = $settings.versions[0].version
-$version = Read-Host ("Select Version (" +(($settings.versions | ForEach-Object { $_.version }) -join ", ") + ") (default $defaultVersion)")
-if (!($version)) {
-    $version = $defaultVersion
+    Invoke-Command -Session $vmSession -ScriptBlock ([ScriptBlock]::Create([System.IO.File]::ReadAllText($filename))) -ArgumentList $argumentList
 }
 
-$defaultProfile = $settings.profiles | Where-Object { $_.profile -eq $env:USERNAME }
-if (!($defaultProfile)) {
-    $defaultProfile = $settings.profiles | Where-Object { $_.profile -eq "default" }
-}
-if ($defaultProfile) {
-    $profile = $defaultProfile.profile
-} else {
-    $defaultProfile = $settings.profiles[0]
-    $profile = Read-Host ("Select profile (" +(($settings.profiles | ForEach-Object { $_.profile }) -join ", ") + ") (default $($defaultProfile.profile))")
-}
+function CopyFileToSession {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [System.Management.Automation.Runspaces.PSSession] $session,
+        $localfile,
+        [switch] $returnSecureString
+    )
 
-$imageversion = $settings.versions | Where-Object { $_.version -eq $version }
-if (!($imageversion)) {
-    throw "No version for $version in settings.json"
-}
-
-$azureprofile = $settings.profiles | Where-Object { $_.profile -eq $profile }
-if (!($azureprofile)) {
-    throw "No profile for $profile in settings.json"
-}
-
-Import-Module -Name "AzureRM.Resources"
-Import-Module -Name "AzureRM.Compute"
-
-try {
-    if ((Get-AzureRmContext).Subscription.Id -ne $azureprofile.subscriptionId) {
-        Set-AzureRmContext -SubscriptionID $azureprofile.subscriptionId
+    if ($localfile) {
+        if ($localFile -is [securestring]) {
+            $localFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($localFile)))
+        }
+        if ($localfile -notlike "https://*" -and $localfile -notlike "http://*") {
+            $tempFilename = "c:\demo\$([Guid]::NewGuid().ToString())"
+            Copy-Item -ToSession $vmSession -Path $localFile -Destination $tempFilename
+            $localfile = $tempFilename
+        }
+        if ($returnSecureString) {
+            ConvertTo-SecureString -String $localfile -AsPlainText -Force
+        }
+        else {
+            $localfile
+        }
     }
-} catch {
-    Add-AzureRmAccount -Environment $azureprofile.environment
-    Set-AzureRmContext -SubscriptionID $azureprofile.subscriptionId
+    else {
+        if ($returnSecureString) {
+            $null
+        }
+        else {
+            ""
+        }
+    }
 }
 
-$licenseFileSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "LicenseFile"
-$CodeSignPfxFileSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "CodeSignPfxFile"
-$CodeSignPfxPasswordSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "CodeSignPfxPassword"
-$usernameSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "Username"
-$passwordSecret = Get-AzureKeyVaultSecret -VaultName $azureprofile.keyVault -Name "Password"
-
-if (($usernameSecret) -and ($passwordSecret)) {
-    $credential = New-Object System.Management.Automation.PSCredential($usernameSecret.SecretValueText, $passwordSecret.SecretValue)
-} else {
-    throw "Username and Password secrets should be set in the Azure KeyVault"
+function RemoveFileFromSession {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [System.Management.Automation.Runspaces.PSSession] $session,
+        $filename
+    )
+    
+    if ($filename) {
+        if ($filename -is [securestring]) {
+            $filename = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($filename)))
+        }
+        if ($filename -notlike "https://*" -and $filename -notlike "http://*") {
+            Invoke-Command -Session $session -ScriptBlock { Param($filename)
+                Remove-Item $filename -Force
+            } -ArgumentList $filename
+        }
+    }
 }
 
-if (!($licenseFileSecret)) {
-    throw "License File secret should be set in the Azure KeyVault"
+function CopyFoldersToSession {
+    Param(
+        [Parameter(Mandatory=$false)]
+        [System.Management.Automation.Runspaces.PSSession] $session,
+        [Parameter(Mandatory=$true)]
+        [string] $baseFolder,
+        [Parameter(Mandatory=$true)]
+        [string[]] $subFolders,
+        [Parameter(Mandatory=$false)]
+        [string[]] $exclude = @("*.app")
+    )
+
+    $tempFolder = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
+    $subFolders | % {
+        Copy-Item -Path (Join-Path $baseFolder $_) -Destination (Join-Path $tempFolder "$_\") -Recurse -Exclude $exclude
+    }
+
+    $file = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
+    Add-Type -Assembly System.IO.Compression
+    Add-Type -Assembly System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::CreateFromDirectory($tempfolder, $file)
+    $sessionFile = CopyFileToSession -session $session -localfile $file
+    Remove-Item $file -Force
+
+    Invoke-Command -Session $session -ScriptBlock { Param($filename)
+        Add-Type -Assembly System.IO.Compression
+        Add-Type -Assembly System.IO.Compression.FileSystem
+        $tempFoldername = "c:\demo\$([Guid]::NewGuid().ToString())"
+        [System.IO.Compression.ZipFile]::ExtractToDirectory($filename, $tempfoldername)
+        Remove-Item $filename -Force
+        $tempfoldername
+    } -ArgumentList $sessionFile
+}
+
+function RemoveFolderFromSession {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [System.Management.Automation.Runspaces.PSSession] $session,
+        [Parameter(Mandatory=$true)]
+        [string] $foldername
+    )
+    
+    Invoke-Command -Session $session -ScriptBlock { Param($foldername)
+        Remove-Item $foldername -Force -Recurse
+    } -ArgumentList $foldername
 }

@@ -1,17 +1,44 @@
 ﻿. (Join-Path $PSScriptRoot "Initialize.ps1")
 
-$type = "dev"
+$containername = "$($settings.name)-dev"
 
-$deployment = . (Join-Path $PSScriptRoot "scripts\DeployTo-AzureVM.ps1") -run Local -version $version -type $type -credential $credential -profile $profile
+$azureVM = $userProfile.AzureVM
+$azureVmCredential = New-Object PSCredential $azureVM.Username, ($azureVM.Password | ConvertTo-SecureString)
+$sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
+$vmSession = $null
+$tempLicenseFile = ""
+$vmFolder = ""
 
-if ($deployment.PSObject.Properties.Name -eq "Outputs") {
-    if ($deployment.Outputs["landingPage"]) {
-        $deployment
-        Start-Process $deployment.Outputs["landingPage"].Value
-        UpdateLaunchJson -name "AzureVM Sandbox" -server "https://$($azureprofile.Properties.vmName).$($azureprofile.domain)"
-    } else {
-        Write-Host "Deployment doesn't contain any Output"
-    }
-} else {
-    Write-Host "Deployment failed"
+try {
+    $vmSession = New-PSSession -ComputerName $azureVM.ComputerName -Credential $azureVmCredential -UseSSL -SessionOption $sessionOption
+    $vmFolder = CopyFoldersToSession -session $vmSession -baseFolder $ScriptRoot -subFolders @("scripts")
+
+    $tempLicenseFile = CopyFileToSession -session $vmSession -localFile $licenseFile -returnSecurestring
+
+    Invoke-Command -Session $vmSession -ScriptBlock { Param($ScriptRoot, $containerName, $imageVersion, $credential, $licenseFile, $settings)
+        $ErrorActionPreference = "Stop"
+
+        . (Join-Path $ScriptRoot "scripts\Install-NavContainerHelper.ps1") -run AzureVM
+        . (Join-Path $ScriptRoot "scripts\Create-Container.ps1")           -run AzureVM -containerName $containerName -imageName $imageversion.containerImage -credential $credential -licensefile $licensefile -alwaysPull:($imageversion.alwaysPull) -hybrid:($settings.hybrid)
+        . (Join-Path $ScriptRoot "scripts\Import-TestToolkit.ps1")         -run AzureVM -containerName $containerName -credential $credential
+
+    } -ArgumentList $vmFolder, $containerName, $imageVersion, $credential, $tempLicenseFile, $settings
+
 }
+catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
+    try { $myip = ""; $myip = (Invoke-WebRequest -Uri http://ifconfig.me/ip).Content } catch { }
+    throw "Could not connect to $($azureVM.ComputerName). Maybe port 5986 (WinRM) is not open for your IP address $myip"
+}
+finally {
+    if ($vmSession) {
+        if ($tempLicenseFile) {
+            try { RemoveFileFromSession -session $vmSession -filename $tempLicenseFile } catch {}
+        }
+        if ($vmFolder) {
+            try { RemoveFolderFromSession -session $vmSession -foldername $vmFolder } catch {}
+        }
+        Remove-PSSession -Session $vmSession
+    }
+}
+
+UpdateLaunchJson -name "AzureVM Sandbox" -server "https://$($azureVM.ComputerName)" -port 443 -serverInstance "$($containername)dev"

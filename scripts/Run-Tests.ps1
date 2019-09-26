@@ -1,22 +1,63 @@
 ﻿Param(
-    [ValidateSet('AzureDevOps','Local')]
+    [ValidateSet('AzureDevOps','Local','AzureVM')]
+    [Parameter(Mandatory=$false)]
     [string] $run = "AzureDevOps",
-    [ValidateSet('current','nextminor','nextmajor')]
-    [string] $version = "current",
-    [ValidateSet('bld','dev')]
-    [string] $type = "bld",
+
     [Parameter(Mandatory=$true)]
-    [string] $testSuite,
+    [string] $containerName,
+
+    [Parameter(Mandatory=$false)]
+    [string] $testSuite = "Default",
+
     [Parameter(Mandatory=$true)]
     [pscredential] $credential,
+
     [Parameter(Mandatory=$true)]
-    [string] $testResultsFile
+    [string] $testResultsFile,
+
+    [switch] $reRunFailedTests
 )
 
-# Run Test is a temporary hack
-# We are working on a better solution
-$settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
-$containerName = "$($settings.name)-$type"
 $TempTestResultFile = "C:\ProgramData\NavContainerHelper\Extensions\$containerName\Test Results.xml"
-Run-TestsInNavContainer -containerName $containerName -XUnitResultFileName $TempTestResultFile -testSuite $testSuite -credential $credential -AzureDevOps warning
+
+$tests = Get-TestsFromBCContainer -containerName $containerName `
+                                  -credential $credential `
+                                  -ignoreGroups `
+                                  -testSuite $testSuite `
+                                  -usePublicWebBaseUrl:($run -eq "AzureVM")
+
+$azureDevOpsParam = @{}
+if ($run -eq "AzureDevOps") {
+    $azureDevOpsParam = @{ "AzureDevOps" = "Warning" }
+}
+
+$rerunTests = @()
+$failedTests = @()
+$first = $true
+$tests | % {
+    if (-not (Run-TestsInBcContainer @AzureDevOpsParam -containerName $containerName `
+                                     -credential $credential `
+                                     -XUnitResultFileName $TempTestResultFile `
+                                     -AppendToXUnitResultFile:(!$first) `
+                                     -testCodeunit $_.Id `
+                                     -returnTrueIfAllPassed `
+                                     -usePublicWebBaseUrl:($run -eq "AzureVM") `
+                                     -restartContainerAndRetry)) { $rerunTests += $_ }
+    $first = $false
+}
+if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
+    Restart-BCContainer -containerName $containername
+    $rerunTests | % {
+        if (-not (Run-TestsInBcContainer @AzureDevOpsParam -containerName $containerName `
+                                         -credential $credential `
+                                         -XUnitResultFileName $TempTestResultFile `
+                                         -AppendToXUnitResultFile:(!$first) `
+                                         -testCodeunit $_.Id `
+                                         -returnTrueIfAllPassed `
+                                         -usePublicWebBaseUrl:($run -eq "AzureVM") `
+                                         -restartContainerAndRetry)) { $failedTests += $_ }
+        $first = $false
+    }
+}
+
 Copy-Item -Path $TempTestResultFile -Destination $testResultsFile -Force

@@ -1,14 +1,9 @@
 ﻿. (Join-Path $PSScriptRoot "Initialize.ps1")
 
-$type = "dev"
+$containername = "$($settings.name)-dev"
 
-$licenseFileParam = @{}
-if ($licensefileSecret) {
-    $licenseFileParam += @{"licensefile" = $licensefileSecret.SecretValue }
-}
+. (Join-Path $ScriptRoot "scripts\Install-NavContainerHelper.ps1") -run Local -navContainerHelperPath $userProfile.navContainerHelperPath
+. (Join-Path $ScriptRoot "scripts\Create-Container.ps1")           -run Local -containerName $containerName -imageName $imageversion.containerImage -credential $credential -licensefile $licensefile -alwaysPull:($imageversion.alwaysPull) -hybrid:($settings.hybrid)
+. (Join-Path $ScriptRoot "scripts\Import-TestToolkit.ps1")         -run Local -containerName $containerName -credential $credential
 
-. (Join-Path $PSScriptRoot "scripts\Install-NavContainerHelper.ps1") -run Local
-. (Join-Path $PSScriptRoot "scripts\Create-Container.ps1")           -run Local -version $version -type $type -credential $credential @licenseParam
-. (Join-Path $PSScriptRoot "scripts\Import-TestToolkit.ps1")         -run Local -version $version -type $type -credential $credential
-
-UpdateLaunchJson -name "Local Sandbox" -server "http://$($settings.name)-$type"
+UpdateLaunchJson -name "Local Sandbox" -server "http://$containername"

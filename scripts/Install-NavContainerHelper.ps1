@@ -1,18 +1,21 @@
 ﻿Param(
-    [ValidateSet('AzureDevOps','Local')]
-    [string] $run = "AzureDevOps"
+    [ValidateSet('AzureDevOps','Local','AzureVM')]
+    [Parameter(Mandatory=$false)]
+    [string] $run = "AzureDevOps",
+
+    [Parameter(Mandatory=$false)]
+    [string] $navContainerHelperPath = ""
 )
 
-$settings = (Get-Content (Join-Path $PSScriptRoot "..\settings.json") | ConvertFrom-Json)
-$navContainerHelperPath = ""
-if ($settings.PSObject.Properties.name -eq "navContainerHelperPath") {
-    $navContainerHelperPath = $settings.navContainerHelperPath.Replace('$HOME',"$HOME")
-}
-if ($run -eq "Local" -and $navContainerHelperPath -ne "" -and (Test-Path $navContainerHelperPath)) {
+if ($run -ne "AzureDevOps" -and $navContainerHelperPath -ne "" -and (Test-Path $navContainerHelperPath)) {
+
     Write-Host "Using NavContainerHelper from $navContainerHelperPath"
     . $navContainerHelperPath
-} else {
-    $module = Get-InstalledModule -Name navcontainerhelper -ErrorAction Ignore
+
+}
+else {
+
+    $module = Get-InstalledModule -Name navcontainerhelper -ErrorAction SilentlyContinue
     if ($module) {
         $versionStr = $module.Version.ToString()
         Write-Host "NavContainerHelper $VersionStr is installed"
@@ -25,14 +28,15 @@ if ($run -eq "Local" -and $navContainerHelperPath -ne "" -and (Test-Path $navCon
             Update-Module -Name navcontainerhelper -Force -RequiredVersion $latestVersionStr
             Write-Host "NavContainerHelper updated"
         }
-    } else {
-        if (!(Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction Ignore)) {
+    }
+    else {
+        if (!(Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction SilentlyContinue)) {
             Write-Host "Installing NuGet Package Provider"
-            Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.208 -Force -WarningAction Ignore | Out-Null
+            Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.208 -Force -WarningAction SilentlyContinue | Out-Null
         }
         Write-Host "Installing NavContainerHelper"
         Install-Module -Name navcontainerhelper -Force
-        $module = Get-InstalledModule -Name navcontainerhelper -ErrorAction Ignore
+        $module = Get-InstalledModule -Name navcontainerhelper -ErrorAction SilentlyContinue
         $versionStr = $module.Version.ToString()
         Write-Host "NavContainerHelper $VersionStr installed"
     }
