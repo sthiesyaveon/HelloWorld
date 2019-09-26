@@ -9,17 +9,17 @@
     "versions": [
         {
             "version": "current",
-            "containerImage": "mcr.microsoft.com/businesscentral/onprem:1810-cu5-w1-ltsc2019",
+            "containerImage": "mcr.microsoft.com/businesscentral/onprem:1810-cu5-w1",
             "alwaysPull": true
         },
         {
             "version": "nextminor",
-            "containerImage": "mcr.microsoft.com/businesscentral/onprem:1810-cu6-w1-ltsc2019",
+            "containerImage": "mcr.microsoft.com/businesscentral/onprem:1810-cu6-w1",
             "alwaysPull": true
         },
         {
             "version": "nextmajor",
-            "containerImage": "mcr.microsoft.com/businesscentral/onprem:1904-cu3-w1-ltsc2019",
+            "containerImage": "mcr.microsoft.com/businesscentral/onprem:1904-cu3-w1",
             "alwaysPull": true
         }
     ],
