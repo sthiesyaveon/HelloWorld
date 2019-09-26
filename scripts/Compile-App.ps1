@@ -12,8 +12,8 @@ Param(
     [Parameter(Mandatory=$true)]
     [string] $buildProjectFolder,
 
-    [Parameter(Mandatory=$true)]
-    [string] $buildSymbolsFolder,
+    [Parameter(Mandatory=$false)]
+    [string] $buildSymbolsFolder = (Join-Path $buildProjectFolder ".alPackages"),
 
     [Parameter(Mandatory=$true)]
     [string] $buildArtifactFolder,

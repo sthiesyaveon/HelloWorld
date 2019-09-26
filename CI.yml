@@ -47,21 +47,6 @@ steps:
     failOnStderr: true
 
 - task: PowerShell@2
-  displayName: 'Sign App'
-  condition: and(succeeded(),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Sign-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -PfxFile (ConvertTo-SecureString -String "$(CodeSignPfxFile)" -AsPlainText -Force) -PfxPassword (ConvertTo-SecureString -String "$(CodeSignPfxPassword)" -AsPlainText -Force)'
-
-- task: PowerShell@2
-  displayName: 'Publish App'
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Publish-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -skipVerification:("$(CodeSignPfxFile)$(CodeSignPfxPassword)" -eq "")'
-
-- task: PowerShell@2
   displayName: 'Import TestToolkit'
   inputs:
     targetType: filePath
@@ -75,6 +60,21 @@ steps:
     filePath: 'scripts\Compile-App.ps1'
     arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("test")'
     failOnStderr: true
+
+- task: PowerShell@2
+  displayName: 'Sign App'
+  condition: and(succeeded(),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Sign-App.ps1'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -PfxFile (ConvertTo-SecureString -String "$(CodeSignPfxFile)" -AsPlainText -Force) -PfxPassword (ConvertTo-SecureString -String "$(CodeSignPfxPassword)" -AsPlainText -Force)'
+
+- task: PowerShell@2
+  displayName: 'Publish App'
+  inputs:
+    targetType: filePath
+    filePath: 'scripts\Publish-App.ps1'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -skipVerification:("$(CodeSignPfxFile)$(CodeSignPfxPassword)" -eq "")'
 
 - task: PowerShell@2
   displayName: 'Publish Test App'
