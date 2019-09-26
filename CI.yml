@@ -34,7 +34,7 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Create-Container.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -licenseFile "$(LicenseFile)"'
+    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -licenseFile $(if ($licenseFile) { ConvertTo-SecureString -String $licenseFile -AsPlainText -Force } else { $null })'
 
 - task: PowerShell@2
   displayName: 'Compile App'
