@@ -5,6 +5,8 @@ variables:
 resources:
 - repo: self
 
+pool: Default
+
 steps:
 - task: PowerShell@2
   displayName: 'Defaulting container version'
