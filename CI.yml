@@ -1,6 +1,8 @@
 variables:
   build.clean: all
   platform: x64
+  containerName: "helloworld-ci"
+  imageName: "mcr.microsoft.com/businesscentral/onprem:1810-cu5-w1"
 
 resources:
 - repo: self
@@ -34,14 +36,14 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Create-Container.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -licenseFile $(if ($licenseFile) { ConvertTo-SecureString -String $licenseFile -AsPlainText -Force } else { $null })'
+    arguments: '-containername "$(containerName)" -imageName "$(imageName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -licenseFile "$(if ($licenseFile) { ConvertTo-SecureString -String $licenseFile -AsPlainText -Force } else { $null })"'
 
 - task: PowerShell@2
   displayName: 'Compile App'
   inputs:
     targetType: filePath
     filePath: 'scripts\Compile-App.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app")'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app")'
     failOnStderr: true
 
 - task: PowerShell@2
@@ -50,28 +52,28 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Sign-App.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -PfxFile (ConvertTo-SecureString -String "$(CodeSignPfxFile)" -AsPlainText -Force) -PfxPassword (ConvertTo-SecureString -String "$(CodeSignPfxPassword)" -AsPlainText -Force)'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -PfxFile (ConvertTo-SecureString -String "$(CodeSignPfxFile)" -AsPlainText -Force) -PfxPassword (ConvertTo-SecureString -String "$(CodeSignPfxPassword)" -AsPlainText -Force)'
 
 - task: PowerShell@2
   displayName: 'Publish App'
   inputs:
     targetType: filePath
     filePath: 'scripts\Publish-App.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -skipVerification:("$(CodeSignPfxFile)$(CodeSignPfxPassword)" -eq "")'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -skipVerification:("$(CodeSignPfxFile)$(CodeSignPfxPassword)" -eq "")'
 
 - task: PowerShell@2
   displayName: 'Import TestToolkit'
   inputs:
     targetType: filePath
     filePath: 'scripts\Import-TestToolkit.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force)))'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force)))'
 
 - task: PowerShell@2
   displayName: 'Compile Test App'
   inputs:
     targetType: filePath
     filePath: 'scripts\Compile-App.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("test")'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("test")'
     failOnStderr: true
 
 - task: PowerShell@2
@@ -79,14 +81,14 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Publish-App.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("test") -skipVerification'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("test") -skipVerification'
 
 - task: PowerShell@2
   displayName: 'Run Tests'
   inputs:
     targetType: filePath
     filePath: 'scripts\Run-Tests.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -TestResultsFile (Join-Path "$(System.DefaultWorkingDirectory)" "TestResults.xml") -testsuite "DEFAULT"'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -TestResultsFile (Join-Path "$(System.DefaultWorkingDirectory)" "TestResults.xml") -testsuite "DEFAULT"'
   
 - task: PublishTestResults@2
   displayName: 'Publish Test Results'
@@ -107,4 +109,4 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Remove-Container.ps1'
-    arguments: '-version "$(version)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force)))'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force)))'
