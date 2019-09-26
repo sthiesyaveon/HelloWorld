@@ -2,7 +2,6 @@ variables:
   build.clean: all
   platform: x64
   containerName: "helloworld-ci"
-  imageName: "mcr.microsoft.com/businesscentral/onprem:1810-cu5-w1"
 
 resources:
 - repo: self
@@ -16,7 +15,7 @@ steps:
   inputs:
     errorActionPreference: silentlyContinue
     targetType: inline
-    script: 'if ("$(version)" -eq "")  { Write-Host "Version not defined, using current container version"; Write-Host "##vso[task.setvariable variable=version]current" } else { Write-Host "Using $(version) container version" }'
+    script: '$settings = (Get-Content (Join-Path $(Build.Repository.LocalPath) "settings.json") | ConvertFrom-Json); $version = "$(version)"; if ("$version" -eq "")  { $version = $settings.versions[0].version; Write-Host "Version not defined, using $version" }; $imageversion = $settings.versions | Where-Object { $_.version -eq $version }; if ($imageversion) { Write-Host "##vso[task.setvariable variable=imageName]$($imageVersion.containerImage)" } else { throw "Unknown version: $version"} '
 
 - task: PowerShell@2
   displayName: 'Login to bcinsider repository'
@@ -88,7 +87,7 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Run-Tests.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -TestResultsFile (Join-Path "$(System.DefaultWorkingDirectory)" "TestResults.xml") -testsuite "DEFAULT"'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -TestResultsFile (Join-Path "$(System.DefaultWorkingDirectory)" "TestResults.xml") -testsuite "DEFAULT" -reRunFailedTests'
   
 - task: PublishTestResults@2
   displayName: 'Publish Test Results'
