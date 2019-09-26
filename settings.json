@@ -10,7 +10,7 @@
         {
             "version": "current",
             "containerImage": "mcr.microsoft.com/businesscentral/onprem:1810-cu5-w1-ltsc2019",
-            "alwaysPull": false
+            "alwaysPull": true
         },
         {
             "version": "nextminor",
