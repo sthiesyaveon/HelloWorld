@@ -1,5 +1,5 @@
 {
-  "id": "<test app id>",
+  "id": "00000000-0000-0000-0000-000000000002",
   "name": "Default Test App Name",
   "publisher": "Default Publisher",
   "brief": "",
@@ -16,12 +16,13 @@
       "name": "Default App Name",
       "publisher": "Default Publisher",
       "version": "1.0.0.0",
-      "appId": "<app id>"
+      "appId": "00000000-0000-0000-0000-000000000001"
     }
   ],
   "screenshots": [],
   "platform": "13.0.0.0",
   "application": "13.0.0.0",
+  "test": "13.0.0.0",
   "idRange": {
     "from": 50100,
     "to": 50149
