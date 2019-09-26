@@ -9,6 +9,9 @@ resources:
 pool:
   name: Default
 
+trigger:
+- master
+
 steps:
 - task: PowerShell@2
   displayName: 'Reading Settings'
