@@ -66,4 +66,4 @@ New-NavContainer @Parameters `
                  -Credential $credential `
                  -additionalParameters $additionalParameters `
                  -includeTestToolkit -includeTestLibrariesOnly `
-                 -bakFolder $containerName
+                 -bakFolder $containerName -doNotUseRuntimePackages
