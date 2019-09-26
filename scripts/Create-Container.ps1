@@ -15,9 +15,7 @@
     [Parameter(Mandatory=$false)]
     [securestring] $licenseFile = $null,
 
-    [switch] $alwaysPull,
-
-    [switch] $hybrid
+    [switch] $alwaysPull
 )
 
 Write-Host "Create $containerName from $imageName"
@@ -25,14 +23,6 @@ Write-Host "Create $containerName from $imageName"
 $parameters = @{
     "Accept_Eula" = $true
     "Accept_Outdated" = $true
-}
-
-if ($hybrid) {
-    $parameters += @{
-        "includeCSide" = $true
-        "doNotExportObjectsToText" = $true
-        "enableSymbolLoading" = $true
-    }
 }
 
 if ($licenseFile) {
@@ -74,4 +64,6 @@ New-NavContainer @Parameters `
                  -alwaysPull:$alwaysPull `
                  -auth "UserPassword" `
                  -Credential $credential `
-                 -additionalParameters $additionalParameters
+                 -additionalParameters $additionalParameters `
+                 -includeTestToolkit -includeTestLibrariesOnly `
+                 -bakFolder $containerName

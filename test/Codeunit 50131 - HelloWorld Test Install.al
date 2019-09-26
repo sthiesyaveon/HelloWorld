@@ -4,8 +4,16 @@ codeunit 50131 "HelloWorld Test Install"
 
     trigger OnInstallAppPerCompany()
     var
-        TestSuite: Codeunit "Test Suite";
+        TestSuiteMgt: Codeunit "Test Suite Mgt.";
+        ALTestSuite: Record "AL Test Suite";
+        SuiteName: Code[10];
     begin
-        TestSuite.Create('DEFAULT', '50132..50133', false);
+        SuiteName := 'DEFAULT';
+        if not ALTestSuite.Get(SuiteName) then begin
+            TestSuiteMgt.CreateTestSuite(SuiteName);
+            Commit();
+            ALTestSuite.Get(SuiteName);
+        end;
+        TestSuiteMgt.SelectTestMethodsByRange(ALTestSuite, '50132..50133');
     end;
 }

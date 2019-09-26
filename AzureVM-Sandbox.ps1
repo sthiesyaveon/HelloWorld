@@ -19,8 +19,7 @@ try {
         $ErrorActionPreference = "Stop"
 
         . (Join-Path $ScriptRoot "scripts\Install-NavContainerHelper.ps1") -run AzureVM
-        . (Join-Path $ScriptRoot "scripts\Create-Container.ps1")           -run AzureVM -containerName $containerName -imageName $imageversion.containerImage -credential $credential -licensefile $licensefile -alwaysPull:($imageversion.alwaysPull) -hybrid:($settings.hybrid)
-        . (Join-Path $ScriptRoot "scripts\Import-TestToolkit.ps1")         -run AzureVM -containerName $containerName -credential $credential
+        . (Join-Path $ScriptRoot "scripts\Create-Container.ps1")           -run AzureVM -containerName $containerName -imageName $imageversion.containerImage -credential $credential -licensefile $licensefile -alwaysPull:($imageversion.alwaysPull)
 
     } -ArgumentList $vmFolder, $containerName, $imageVersion, $credential, $tempLicenseFile, $settings
 

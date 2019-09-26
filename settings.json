@@ -1,6 +1,5 @@
 {
     "name": "helloworld",
-    "hybrid": false,
     "launch" :{
         "startupObjectId":  22,
         "startupObjectType":  "Page",
@@ -9,7 +8,7 @@
     "versions": [
         {
             "version": "current",
-            "containerImage": "mcr.microsoft.com/businesscentral/onprem:1810-cu5-w1",
+            "containerImage": "bcinsider.azurecr.io/bconprem-master",
             "alwaysPull": true
         },
         {

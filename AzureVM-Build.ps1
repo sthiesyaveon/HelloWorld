@@ -36,9 +36,8 @@ try {
         New-Item -Path $alPackagesFolder -ItemType Directory -Force | Out-Null
 
         . (Join-Path $ScriptRoot "scripts\Install-NavContainerHelper.ps1") -run $run -navContainerHelperPath $navContainerHelperPath
-        . (Join-Path $ScriptRoot "scripts\Create-Container.ps1")           -run $run -ContainerName $containerName -imageName $imageVersion.containerImage -alwaysPull:($imageversion.alwaysPull) -hybrid:($settings.hybrid) -Credential $credential -licenseFile $licenseFile
+        . (Join-Path $ScriptRoot "scripts\Create-Container.ps1")           -run $run -ContainerName $containerName -imageName $imageVersion.containerImage -alwaysPull:($imageversion.alwaysPull) -Credential $credential -licenseFile $licenseFile
         . (Join-Path $ScriptRoot "scripts\Compile-App.ps1")                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ScriptRoot -buildSymbolsFolder $alPackagesFolder -appFolders @("app")
-        . (Join-Path $ScriptRoot "scripts\Import-TestToolkit.ps1")         -run $run -ContainerName $containerName -Credential $credential
         . (Join-Path $ScriptRoot "scripts\Compile-App.ps1")                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ScriptRoot -buildSymbolsFolder $alPackagesFolder -appFolders @("test")
         if ($CodeSignPfxFile) {
             . (Join-Path $ScriptRoot "scripts\Sign-App.ps1")               -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -appFolders @("app") -pfxFile $CodeSignPfxFile -pfxPassword $CodeSignPfxPassword
