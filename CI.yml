@@ -1,7 +1,7 @@
 variables:
   build.clean: all
   platform: x64
-  containerName: "helloworld-ci"
+  containerName: "$(Agent.Name)-helloworld"
 
 resources:
 - repo: self
