@@ -15,12 +15,12 @@ New-Item -Path $alPackagesFolder -ItemType Directory -Force | Out-Null
 
 . (Join-Path $ScriptRoot "scripts\Install-NavContainerHelper.ps1") -run $run -navContainerHelperPath $navContainerHelperPath
 . (Join-Path $ScriptRoot "scripts\Create-Container.ps1")           -run $run -ContainerName $containerName -imageName $imageVersion.containerImage -alwaysPull:($imageversion.alwaysPull) -Credential $credential -licenseFile $licenseFile
-. (Join-Path $ScriptRoot "scripts\Compile-App.ps1")                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ScriptRoot -buildSymbolsFolder $alPackagesFolder -appFolders @("app")
-. (Join-Path $ScriptRoot "scripts\Compile-App.ps1")                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ScriptRoot -buildSymbolsFolder $alPackagesFolder -appFolders @("test")
+. (Join-Path $ScriptRoot "scripts\Compile-App.ps1")                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ScriptRoot -buildSymbolsFolder $alPackagesFolder -appFolders $settings.appFolders
+. (Join-Path $ScriptRoot "scripts\Compile-App.ps1")                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ScriptRoot -buildSymbolsFolder $alPackagesFolder -appFolders $settings.testFolders
 if ($CodeSignPfxFile) {
-    . (Join-Path $ScriptRoot "scripts\Sign-App.ps1")               -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -appFolders @("app") -pfxFile $CodeSignPfxFile -pfxPassword $CodeSignPfxPassword
+    . (Join-Path $ScriptRoot "scripts\Sign-App.ps1")               -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -appFolders $settings.appFolders -pfxFile $CodeSignPfxFile -pfxPassword $CodeSignPfxPassword
 }
-. (Join-Path $ScriptRoot "scripts\Publish-App.ps1")                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -appFolders @("app") -skipVerification:(!($CodeSignPfxFile))
-. (Join-Path $ScriptRoot "scripts\Publish-App.ps1")                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -appFolders @("test") -skipVerification
-. (Join-Path $ScriptRoot "scripts\Run-Tests.ps1")                  -run $run -ContainerName $containerName -Credential $credential -testResultsFile (Join-Path $buildArtifactFolder "TestResults.xml")  -reRunFailedTests
+. (Join-Path $ScriptRoot "scripts\Publish-App.ps1")                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -appFolders $settings.appFolders -skipVerification:(!($CodeSignPfxFile))
+. (Join-Path $ScriptRoot "scripts\Publish-App.ps1")                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -appFolders $settings.testFolders -skipVerification
+. (Join-Path $ScriptRoot "scripts\Run-Tests.ps1")                  -run $run -ContainerName $containerName -Credential $credential -testResultsFile (Join-Path $buildArtifactFolder "TestResults.xml")
 . (Join-Path $ScriptRoot "scripts\Remove-Container.ps1")           -run $run -ContainerName $containerName -Credential $credential

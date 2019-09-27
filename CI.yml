@@ -18,7 +18,7 @@ steps:
   inputs:
     errorActionPreference: silentlyContinue
     targetType: inline
-    script: '$settings = (Get-Content (Join-Path $(Build.Repository.LocalPath) "settings.json") | ConvertFrom-Json); $version = "$(version)"; if ("$version" -eq "")  { $version = $settings.versions[0].version; Write-Host "Version not defined, using $version" }; $imageversion = $settings.versions | Where-Object { $_.version -eq $version }; if ($imageversion) { Write-Host "Set imageName = $($imageVersion.containerImage)"; Write-Host "##vso[task.setvariable variable=imageName]$($imageVersion.containerImage)"; Write-Host "Set alwaysPull = $($imageVersion.alwaysPull)"; Write-Host "##vso[task.setvariable variable=alwaysPull]$($imageVersion.alwaysPull)" } else { throw "Unknown version: $version"} '
+    script: '$settings = (Get-Content (Join-Path $(Build.Repository.LocalPath) "settings.json") | ConvertFrom-Json); $appFolders = [string]::Join(',',$settings.appFolders); Write-Host "Set appFolders = $appfolders"; Write-Host "##vso[task.setvariable variable=appFolders]$appFolders"; $testFolders = [string]::Join(',',$settings.testFolders); Write-Host "Set testFolders = $testfolders"; Write-Host "##vso[task.setvariable variable=testFolders]$testFolders"; $version = "$(version)"; if ("$version" -eq "")  { $version = $settings.versions[0].version; Write-Host "Version not defined, using $version" }; $imageversion = $settings.versions | Where-Object { $_.version -eq $version }; if ($imageversion) { Write-Host "Set imageName = $($imageVersion.containerImage)"; Write-Host "##vso[task.setvariable variable=imageName]$($imageVersion.containerImage)"; Write-Host "Set alwaysPull = $($imageVersion.alwaysPull)"; Write-Host "##vso[task.setvariable variable=alwaysPull]$($imageVersion.alwaysPull)" } else { throw "Unknown version: $version"} '
 
 - task: PowerShell@2
   displayName: 'Login to bcinsider repository'
@@ -45,7 +45,7 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Compile-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app")'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders ("$(appFolders)".Split(','))'
     failOnStderr: true
 
 - task: PowerShell@2
@@ -53,7 +53,7 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Compile-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("test")'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders ("$(testFolders)".Split(','))'
     failOnStderr: true
 
 - task: PowerShell@2
@@ -62,21 +62,21 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Sign-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -PfxFile (ConvertTo-SecureString -String "$(CodeSignPfxFile)" -AsPlainText -Force) -PfxPassword (ConvertTo-SecureString -String "$(CodeSignPfxPassword)" -AsPlainText -Force)'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -PfxFile (ConvertTo-SecureString -String "$(CodeSignPfxFile)" -AsPlainText -Force) -PfxPassword (ConvertTo-SecureString -String "$(CodeSignPfxPassword)" -AsPlainText -Force) -appFolders ("$(appFolders)".Split(','))'
 
 - task: PowerShell@2
   displayName: 'Publish App'
   inputs:
     targetType: filePath
     filePath: 'scripts\Publish-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("app") -skipVerification:("$(CodeSignPfxFile)$(CodeSignPfxPassword)" -eq "")'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -skipVerification:("$(CodeSignPfxFile)$(CodeSignPfxPassword)" -eq "") -appFolders ("$(appFolders)".Split(','))'
 
 - task: PowerShell@2
   displayName: 'Publish Test App'
   inputs:
     targetType: filePath
     filePath: 'scripts\Publish-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders @("test") -skipVerification'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -skipVerification -appFolders ("$(testFolders)".Split(','))'
 
 - task: PowerShell@2
   displayName: 'Run Tests'

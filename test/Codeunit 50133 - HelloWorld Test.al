@@ -18,7 +18,7 @@ codeunit 50133 "HelloWorld Test"
     [MessageHandler]
     procedure HelloWorldMessageHandler(Message: Text[1024])
     begin
-        MessageDisplayed := Message = 'App published: Hello world';
+        MessageDisplayed := Message = 'App published: Hello World Base!';
     end;
 
     var
