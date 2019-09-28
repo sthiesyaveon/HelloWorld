@@ -4,7 +4,7 @@ variables:
   containerName: "$(Agent.Name)-ci"
   version: "current"
   navContainerHelperVersion: "0.6.4.4"
-  reuseContainer: "Yes"
+  reuseContainer: "No"
 
 resources:
 - repo: self
