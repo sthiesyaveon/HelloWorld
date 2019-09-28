@@ -1,13 +1,13 @@
 {
 	"folders": [
 		{
+			"path": "base"
+		},
+		{
 			"path": "app"
 		},
 		{
 			"path": "test"
-		},
-		{
-			"path": "base"
 		}
 	],
 	"settings": {}

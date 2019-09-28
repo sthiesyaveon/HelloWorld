@@ -10,7 +10,7 @@
                                "port":  7049,
                                "tenant":  "",
                                "authentication":  "UserPassword",
-                               "startupObjectId":  130451,
+                               "startupObjectId":  22,
                                "startupObjectType":  "Page",
                                "breakOnError":  true
                            }

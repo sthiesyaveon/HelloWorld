@@ -1,4 +1,4 @@
-﻿. (Join-Path $PSScriptRoot "Initialize.ps1")
+﻿. ".\Initialize.ps1"
 
 $containername = "$($settings.name)-dev"
 
@@ -11,15 +11,19 @@ $vmFolder = ""
 
 try {
     $vmSession = New-PSSession -ComputerName $azureVM.ComputerName -Credential $azureVmCredential -UseSSL -SessionOption $sessionOption
-    $vmFolder = CopyFoldersToSession -session $vmSession -baseFolder $ScriptRoot -subFolders @("scripts")
+    $vmFolder = CopyFoldersToSession -session $vmSession -baseFolder $ProjectRoot -subFolders @("scripts")
 
     $tempLicenseFile = CopyFileToSession -session $vmSession -localFile $licenseFile -returnSecurestring
 
-    Invoke-Command -Session $vmSession -ScriptBlock { Param($ScriptRoot, $containerName, $imageVersion, $credential, $licenseFile, $settings)
+    Invoke-Command -Session $vmSession -ScriptBlock { Param($ProjectRoot, $containerName, $imageVersion, $credential, $licenseFile, $settings)
         $ErrorActionPreference = "Stop"
+        cd (Join-Path $ProjectRoot "scripts")
 
-        . (Join-Path $ScriptRoot "scripts\Install-NavContainerHelper.ps1") -run AzureVM
-        . (Join-Path $ScriptRoot "scripts\Create-Container.ps1")           -run AzureVM -containerName $containerName -imageName $imageversion.containerImage -credential $credential -licensefile $licensefile -alwaysPull:($imageversion.alwaysPull)
+        $run = "AzureVM"
+        $navContainerHelperPath = "C:\DEMO\navcontainerhelper-dev\NavContainerHelper.ps1"
+
+        . ".\Install-NavContainerHelper.ps1" -run $run -navContainerHelperPath $navContainerHelperPath
+        . ".\Create-Container.ps1"           -run $run -containerName $containerName -imageName $imageversion.containerImage -credential $credential -licensefile $licensefile -alwaysPull:($imageversion.alwaysPull)
 
     } -ArgumentList $vmFolder, $containerName, $imageVersion, $credential, $tempLicenseFile, $settings
 

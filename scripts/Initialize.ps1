@@ -1,8 +1,9 @@
 ﻿$ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
-$ScriptRoot = $PSScriptRoot
 
-$settings = (Get-Content (Join-Path $ScriptRoot "settings.json") | ConvertFrom-Json)
+$ProjectRoot = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
+
+$settings = (Get-Content (Join-Path $ProjectRoot "scripts\settings.json") | ConvertFrom-Json)
 
 $defaultVersion = $settings.versions[0].version
 $version = Read-Host ("Select Version (" +(($settings.versions | ForEach-Object { $_.version }) -join ", ") + ") (default $defaultVersion)")
@@ -50,7 +51,7 @@ Function UpdateLaunchJson {
         [string] $Name,
         [string] $Server,
         [int] $Port = 7049,
-        [string] $ServerInstance = "NAV"
+        [string] $ServerInstance = "BC"
     )
     
     $launchSettings = [ordered]@{ "type" = "al";
@@ -63,7 +64,7 @@ Function UpdateLaunchJson {
                                   "authentication" =  "UserPassword"
     }
     
-    $settings = (Get-Content (Join-Path $ScriptRoot "settings.json") | ConvertFrom-Json)
+    $settings = (Get-Content (Join-Path $ProjectRoot "scripts\settings.json") | ConvertFrom-Json)
     
     $settings.launch.PSObject.Properties | % {
         $setting = $_
@@ -76,7 +77,7 @@ Function UpdateLaunchJson {
         }
     }
     
-    Get-ChildItem $ScriptRoot -Directory | ForEach-Object {
+    Get-ChildItem $ProjectRoot -Directory | ForEach-Object {
         $folder = $_.FullName
         $launchJsonFile = Join-Path $folder ".vscode\launch.json"
         if (Test-Path $launchJsonFile) {
