@@ -57,7 +57,7 @@ else {
 
 }
 
-if ($reuseContainer -and (Test-NavContainer -containerName $containerName -doNotIncludeStoppedContainers)) {
+if ($reuseContainer -and (Test-NavContainer -containerName $containerName)) {
     Restore-DatabasesInBCContainer -containerName $containerName -bakFolder $containerName
 }
 else {
