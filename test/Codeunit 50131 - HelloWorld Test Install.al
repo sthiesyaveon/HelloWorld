@@ -14,6 +14,6 @@ codeunit 50131 "HelloWorld Test Install"
             Commit();
             ALTestSuite.Get(SuiteName);
         end;
-        TestSuiteMgt.SelectTestMethodsByRange(ALTestSuite, '50132..50133');
+        TestSuiteMgt.SelectTestMethodsByRange(ALTestSuite, '50133..50133');
     end;
 }
