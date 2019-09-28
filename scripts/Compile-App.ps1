@@ -19,13 +19,13 @@ Param(
     [string] $buildArtifactFolder,
     
     [Parameter(Mandatory=$true)]
-    [string[]] $appFolders,
+    [string] $appFolders,
     
     [switch] $updateSymbols
 )
 
-$appFolders = Sort-AppFoldersByDependencies -appFolders $appFolders -baseFolder $buildProjectFolder -WarningAction SilentlyContinue
-$appFolders | ForEach-Object {
+Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
+    Write-Host "Compiling $_"
     $appFile = Compile-AppInNavContainer -containerName $containerName -credential $credential -appProjectFolder (Join-Path $buildProjectFolder $_) -appSymbolsFolder $buildSymbolsFolder -appOutputFolder (Join-Path $buildArtifactFolder $_) -UpdateSymbols:$updateSymbols -AzureDevOps:($run -eq "AzureDevOps")
     if ($appFile -and (Test-Path $appFile)) {
         Copy-Item -Path $appFile -Destination $buildSymbolsFolder -Force

@@ -13,7 +13,7 @@
     [string] $buildArtifactFolder,
 
     [Parameter(Mandatory=$true)]
-    [string[]] $appFolders,
+    [string] $appFolders,
 
     [Parameter(Mandatory=$true)]
     [securestring] $pfxFile,
@@ -23,7 +23,8 @@
 )
 
 $unsecurepfxFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($pfxFile)))
-$appFolders | ForEach-Object {
+$appFolders.Split(',') | ForEach-Object {
+    Write-Host "Signing $_"
     Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) | ForEach-Object {
         Sign-NavContainerApp -containerName $containerName -appFile $_.FullName -pfxFile $unsecurePfxFile -pfxPassword $pfxPassword
     }

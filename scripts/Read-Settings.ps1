@@ -11,11 +11,11 @@ if ("$version" -eq "")  {
     $version = $settings.versions[0].version
     Write-Host "Version not defined, using $version"
 }
-$appFolders = [string]::Join(',',$settings.appFolders)
+$appFolders = $settings.appFolders
 Write-Host "Set appFolders = $appFolders"
 Write-Host "##vso[task.setvariable variable=appFolders]$appFolders"
 
-$testFolders = [string]::Join(',',$settings.testFolders)
+$testFolders = $settings.testFolders
 Write-Host "Set testFolders = $testFolders"
 Write-Host "##vso[task.setvariable variable=testFolders]$testFolders"
 

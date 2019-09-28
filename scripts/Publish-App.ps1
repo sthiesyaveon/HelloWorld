@@ -13,13 +13,13 @@
     [string] $buildArtifactFolder,
 
     [Parameter(Mandatory=$true)]
-    [string[]] $appFolders,
+    [string] $appFolders,
 
     [switch] $skipVerification
 )
 
-$appFolders = Sort-AppFoldersByDependencies -appFolders $appFolders -baseFolder $buildProjectFolder -WarningAction SilentlyContinue
-$appFolders | ForEach-Object {
+Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
+    Write-Host "Publishing $_"
     Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) | ForEach-Object {
         Publish-NavContainerApp -containerName $containerName -appFile $_.FullName -skipVerification:$skipVerification -sync -install
     }

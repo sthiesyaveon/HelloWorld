@@ -16,7 +16,7 @@ $vmFolder = ""
 
 try {
     $vmSession = New-PSSession -ComputerName $azureVM.ComputerName -Credential $azureVmCredential -UseSSL -SessionOption $sessionOption
-    $vmFolder = CopyFoldersToSession -session $vmSession -baseFolder $ProjectRoot -subFolders (@("scripts") + $settings.appFolders + $settings.testFolders)
+    $vmFolder = CopyFoldersToSession -session $vmSession -baseFolder $ProjectRoot -subFolders (@("scripts") + $settings.appFolders.Split(',') + $settings.testFolders.Split(','))
 
     $tempLicenseFile = CopyFileToSession -session $vmSession -LocalFile $licenseFile -returnSecureString
     $tempCodeSignPfxFile = CopyFileToSession -session $vmSession -LocalFile $codeSignPfxFile -returnSecureString

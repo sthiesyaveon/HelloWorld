@@ -5,8 +5,8 @@
         "startupObjectType":  "Page",
         "breakOnError":  true
     },
-    "appFolders": [ "app", "base" ],
-    "testFolders": [ "test" ],
+    "appFolders": "app,base",
+    "testFolders": "test",
     "versions": [
         {
             "version": "current",
