@@ -2,7 +2,8 @@ variables:
   build.clean: all
   platform: x64
   containerName: "$(Agent.Name)-ci"
-  version: current
+  version: "current"
+  navContainerHelperVersion: "0.6.4.4"
 
 resources:
 - repo: self
@@ -33,13 +34,14 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Install-NavContainerHelper.ps1'
+    arguments: '-navContainerHelperVersion "$(navContainerHelperVersion)"'
 
 - task: PowerShell@2
   displayName: 'Create Build Container'
   inputs:
     targetType: filePath
     filePath: 'scripts\Create-Container.ps1'
-    arguments: '-containername "$(containerName)" -imageName "$(imageName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -licenseFile $(if ("$(licenseFile)") { ConvertTo-SecureString -String "$(licenseFile)" -AsPlainText -Force } else { $null }) -alwayspull:("$(alwayspull)" -eq "True")'
+    arguments: '-containername "$(containerName)" -imageName "$(imageName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -licenseFile $(if ("$(licenseFile)") { ConvertTo-SecureString -String "$(licenseFile)" -AsPlainText -Force } else { $null }) -alwayspull:("$(alwayspull)" -eq "True") -reuseContainer'
 
 - task: PowerShell@2
   displayName: 'Compile App'

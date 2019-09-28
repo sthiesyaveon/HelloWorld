@@ -4,7 +4,10 @@
     [string] $run = "AzureDevOps",
 
     [Parameter(Mandatory=$false)]
-    [string] $navContainerHelperPath = ""
+    [string] $navContainerHelperPath = "",
+
+    [Parameter(Mandatory=$false)]
+    [string] $navContainerHelperVersion = "latest"
 )
 
 if ($run -ne "AzureDevOps" -and $navContainerHelperPath -ne "" -and (Test-Path $navContainerHelperPath)) {
@@ -19,13 +22,15 @@ else {
     if ($module) {
         $versionStr = $module.Version.ToString()
         Write-Host "NavContainerHelper $VersionStr is installed"
-        Write-Host "Determine latest NavContainerHelper version"
-        $latestVersion = (Find-Module -Name navcontainerhelper).Version
-        $latestVersionStr = $latestVersion.ToString()
-        Write-Host "NavContainerHelper $latestVersionStr is the latest version"
-        if ($latestVersion -gt $module.Version) {
-            Write-Host "Updating NavContainerHelper to $latestVersionStr"
-            Update-Module -Name navcontainerhelper -Force -RequiredVersion $latestVersionStr
+        if ($navContainerHelperVersion -eq "latest") {
+            Write-Host "Determine latest NavContainerHelper version"
+            $latestVersion = (Find-Module -Name navcontainerhelper).Version
+            $navContainerHelperVersion = $latestVersion.ToString()
+            Write-Host "NavContainerHelper $navContainerHelperVersion is the latest version"
+        }
+        if ($navContainerHelperVersion -ne $module.Version) {
+            Write-Host "Updating NavContainerHelper to $navContainerHelperVersion"
+            Update-Module -Name navcontainerhelper -Force -RequiredVersion $navContainerHelperVersion
             Write-Host "NavContainerHelper updated"
         }
     }
@@ -34,8 +39,14 @@ else {
             Write-Host "Installing NuGet Package Provider"
             Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.208 -Force -WarningAction SilentlyContinue | Out-Null
         }
-        Write-Host "Installing NavContainerHelper"
-        Install-Module -Name navcontainerhelper -Force
+        if ($navContainerHelperVersion -eq "latest") {
+            Write-Host "Installing NavContainerHelper"
+            Install-Module -Name navcontainerhelper -Force
+        }
+        else {
+            Write-Host "Installing NavContainerHelper version $navContainerHelperVersion"
+            Install-Module -Name navcontainerhelper -Force -RequiredVersion $navContainerHelperVersion
+        }
         $module = Get-InstalledModule -Name navcontainerhelper -ErrorAction SilentlyContinue
         $versionStr = $module.Version.ToString()
         Write-Host "NavContainerHelper $VersionStr installed"

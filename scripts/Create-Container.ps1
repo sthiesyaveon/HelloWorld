@@ -15,7 +15,9 @@
     [Parameter(Mandatory=$false)]
     [securestring] $licenseFile = $null,
 
-    [switch] $alwaysPull
+    [switch] $alwaysPull,
+
+    [switch] $reuseContainer
 )
 
 Write-Host "Create $containerName from $imageName"
@@ -55,15 +57,20 @@ else {
 
 }
 
-New-NavContainer @Parameters `
-                 -doNotCheckHealth `
-                 -updateHosts `
-                 -useBestContainerOS `
-                 -containerName $containerName `
-                 -imageName $imageName `
-                 -alwaysPull:$alwaysPull `
-                 -auth "UserPassword" `
-                 -Credential $credential `
-                 -additionalParameters $additionalParameters `
-                 -includeTestToolkit -includeTestLibrariesOnly `
-                 -bakFolder $containerName -doNotUseRuntimePackages
+if ($reuseContainer -and (Test-NavContainer -containerName $containerName -doNotIncludeStoppedContainers)) {
+    Restore-DatabasesInBCContainer -containerName $containerName -bakFolder $containerName
+}
+else {
+    New-NavContainer @Parameters `
+                     -doNotCheckHealth `
+                     -updateHosts `
+                     -useBestContainerOS `
+                     -containerName $containerName `
+                     -imageName $imageName `
+                     -alwaysPull:$alwaysPull `
+                     -auth "UserPassword" `
+                     -Credential $credential `
+                     -additionalParameters $additionalParameters `
+                     -includeTestToolkit -includeTestLibrariesOnly `
+                     -bakFolder $containerName -doNotUseRuntimePackages
+}
