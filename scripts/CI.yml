@@ -46,7 +46,7 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Compile-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders ("$(appFolders)".Split(','))'
+    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders "app,base".Split(',')'
     failOnStderr: true
 
 - task: PowerShell@2
