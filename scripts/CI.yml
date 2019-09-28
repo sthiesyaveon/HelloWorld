@@ -4,6 +4,7 @@ variables:
   containerName: "$(Agent.Name)-ci"
   version: "current"
   navContainerHelperVersion: "0.6.4.4"
+  reuseContainer: "Yes"
 
 resources:
 - repo: self
@@ -41,7 +42,7 @@ steps:
   inputs:
     targetType: filePath
     filePath: 'scripts\Create-Container.ps1'
-    arguments: '-containername "$(containerName)" -imageName "$(imageName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -licenseFile $(if ("$(licenseFile)") { ConvertTo-SecureString -String "$(licenseFile)" -AsPlainText -Force } else { $null }) -alwayspull:("$(alwayspull)" -eq "True") -reuseContainer'
+    arguments: '-containername "$(containerName)" -imageName "$(imageName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -licenseFile $(if ("$(licenseFile)") { ConvertTo-SecureString -String "$(licenseFile)" -AsPlainText -Force } else { $null }) -alwayspull:("$(alwayspull)" -eq "True") -reuseContainer:("$(reUsecontainer)" -eq "Yes")'
 
 - task: PowerShell@2
   displayName: 'Compile App'
@@ -103,7 +104,7 @@ steps:
 
 - task: PowerShell@2
   displayName: 'Remove Build Container'
-  condition: always()
+  condition: ne(variables['reuseContainer'],'Yes')
   inputs:
     targetType: filePath
     filePath: 'scripts\Remove-Container.ps1'
