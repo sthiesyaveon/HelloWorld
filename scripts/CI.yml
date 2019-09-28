@@ -104,8 +104,7 @@ steps:
 
 - task: PowerShell@2
   displayName: 'Remove Build Container'
-  condition: ne(variables['reuseContainer'],'Yes')
-  inputs:
+    inputs:
     targetType: filePath
     filePath: 'scripts\Remove-Container.ps1'
     arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force)))'
