@@ -13,15 +13,15 @@ if ("$version" -eq "")  {
 }
 
 $property = $settings.PSObject.Properties.Match('containerName')
-if ($property) {
+if ($property.Value) {
     $containerName = $property.Value
 }
 else {
-    $containerName = $settings.Name+"ci"
+    $containerName = "$($settings.Name)-ci"
 }
 
 $property = $settings.PSObject.Properties.Match('navContainerHelperVersion')
-if ($property) {
+if ($property.Value) {
     $navContainerHelperVersion = $property.Value
 }
 else {
@@ -44,7 +44,7 @@ if ($imageversion) {
     Write-Host "##vso[task.setvariable variable=imageName]$($imageVersion.containerImage)"
     "alwaysPull","reuseContainer" | ForEach-Object {
         $property = $imageVersion.PSObject.Properties.Match($_)
-        if ($property) {
+        if ($property.Value) {
             $propertyValue = $property.Value
         }
         else {
