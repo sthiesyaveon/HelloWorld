@@ -12,12 +12,20 @@ if ("$version" -eq "")  {
     Write-Host "Version not defined, using $version"
 }
 
+$property = $settings.PSObject.Properties.Match('containerName')
+if ($property) {
+    $containerName = $property.Value
+}
+else {
+    $containerName = $settings.Name+"ci"
+}
+
 $property = $settings.PSObject.Properties.Match('navContainerHelperVersion')
 if ($property) {
     $navContainerHelperVersion = $property.Value
 }
 else {
-    $navContainerHelperVersion = $property.Value
+    $navContainerHelperVersion = "latest"
 }
 Write-Host "Set navContainerHelperVersion = $navContainerHelperVersion"
 Write-Host "##vso[task.setvariable variable=navContainerHelperVersion]$navContainerHelperVersion"
@@ -45,7 +53,13 @@ if ($imageversion) {
         Write-Host "Set $_ = $propertyValue"
         Write-Host "##vso[task.setvariable variable=$_]$propertyValue"
     }
+    if ($imageVersion.PSObject.Properties.Match("containerName")) {
+        $containerName = $imageversion.containerName
+    }
 }
 else {
     throw "Unknown version: $version"
 }
+
+Write-Host "Set containerName = $containerName"
+Write-Host "##vso[task.setvariable variable=containerName]$containerName"
