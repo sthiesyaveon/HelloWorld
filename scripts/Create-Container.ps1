@@ -71,6 +71,7 @@ else {
                      -auth "UserPassword" `
                      -Credential $credential `
                      -additionalParameters $additionalParameters `
-                     -includeTestToolkit -includeTestLibrariesOnly `
-                     -bakFolder $containerName -doNotUseRuntimePackages
+                     -includeTestToolkit `
+                     -includeTestLibrariesOnly `
+                     -doNotUseRuntimePackages
 }
