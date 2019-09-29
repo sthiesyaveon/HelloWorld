@@ -53,7 +53,7 @@ if ($imageversion) {
         Write-Host "Set $_ = $propertyValue"
         Write-Host "##vso[task.setvariable variable=$_]$propertyValue"
     }
-    if ($imageVersion.PSObject.Properties.Match("containerName")) {
+    if ($imageVersion.PSObject.Properties.Match("containerName").Value) {
         $containerName = $imageversion.containerName
     }
 }
