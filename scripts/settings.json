@@ -1,17 +1,18 @@
 {
     "name": "helloworld",
+    "navContainerHelperVersion": "0.6.4.4",
+    "appFolders": "app,base",
+    "testFolders": "test",
     "launch" :{
         "startupObjectId":  22,
         "startupObjectType":  "Page",
         "breakOnError":  true
     },
-    "appFolders": "app,base",
-    "testFolders": "test",
     "versions": [
         {
             "version": "current",
             "containerImage": "bcinsider.azurecr.io/bconprem-master",
-            "alwaysPull": true
+            "reuseContainer": true
         },
         {
             "version": "nextminor",
