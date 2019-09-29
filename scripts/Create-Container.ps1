@@ -57,10 +57,16 @@ else {
 
 }
 
-if ($reuseContainer -and (Test-NavContainer -containerName $containerName)) {
-    Restore-DatabasesInBCContainer -containerName $containerName -bakFolder $containerName
+$restoreDb = $reuseContainer -and (Test-NavContainer -containerName $containerName)
+if ($restoreDb) {
+    try {
+        Restore-DatabasesInBCContainer -containerName $containerName -bakFolder $containerName
+    }
+    catch {
+        $restoreDb = $false
+    }
 }
-else {
+if (!$restoreDb) {
     New-NavContainer @Parameters `
                      -doNotCheckHealth `
                      -updateHosts `
@@ -74,4 +80,6 @@ else {
                      -includeTestToolkit `
                      -includeTestLibrariesOnly `
                      -doNotUseRuntimePackages
+    
+    Backup-NavContainerDatabases -containerName $containerName -bakFolder $containerName
 }

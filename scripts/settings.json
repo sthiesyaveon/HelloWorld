@@ -12,7 +12,8 @@
         {
             "version": "current",
             "containerImage": "bcinsider.azurecr.io/bconprem-master",
-            "reuseContainer": true
+            "reuseContainer": true,
+            "containerName": "helloworld-ci"
         },
         {
             "version": "nextminor",

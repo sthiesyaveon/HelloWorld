@@ -17,7 +17,7 @@ if ($property.Value) {
     $containerName = $property.Value
 }
 else {
-    $containerName = "$($settings.Name)-ci"
+    $containerName = "$($settings.Name)-bld"
 }
 
 $property = $settings.PSObject.Properties.Match('navContainerHelperVersion')
