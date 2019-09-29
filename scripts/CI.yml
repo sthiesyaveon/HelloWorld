@@ -101,7 +101,6 @@ steps:
 
 - task: PowerShell@2
   displayName: 'Remove Build Container'
-  condition: ne(variables['reuseContainer'],'True')
   inputs:
     targetType: filePath
     filePath: 'scripts\Remove-Container.ps1'
