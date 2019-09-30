@@ -30,7 +30,7 @@ if (-not ($CodeSignPfxPassword)) {
 $unsecurepfxFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($codeSignPfxFile)))
 $appFolders.Split(',') | ForEach-Object {
     Write-Host "Signing $_"
-    Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) | ForEach-Object {
+    Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) -Filter "*.app" | ForEach-Object {
         Sign-NavContainerApp -containerName $containerName -appFile $_.FullName -pfxFile $unsecurePfxFile -pfxPassword $codeSignPfxPassword
     }
 }
