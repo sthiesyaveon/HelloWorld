@@ -1,27 +1,34 @@
 ﻿Param(
     [Parameter(Mandatory=$true)]
-    [string] $environment,
+    [ValidateSet('AzureVM','onlineTenant')]
+    [string] $deploymentType,
 
     [Parameter(Mandatory=$true)]
-    [string] $artifactsFolder = "",
+    [string] $artifactsFolder,
 
     [Parameter(Mandatory=$true)]
-    [string] $appFolders = "",
+    [string] $appFolders,
 
     [Parameter(Mandatory=$false)]
     [pscredential] $credential = $null,
 
     [Parameter(Mandatory=$false)]
-    [pscredential] $vmcredential = $null
+    [string] $apiBaseUrl = $ENV:APIBASEURL,
+
+    [Parameter(Mandatory=$false)]
+    [pscredential] $vmcredential = $null,
+
+    [Parameter(Mandatory=$false)]
+    [string] $azureVM = $ENV:AZUREVM,
+
+    [Parameter(Mandatory=$false)]
+    [string] $containerName = $ENV:CONTAINERNAME 
+
 )
 
-$settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
-$selectedEnvironment = $settings.Environments | Where-Object { $_.Name -eq $environment }
-if (!($selectedEnvironment)) {
-    throw "Environment not defined!"
-}
-
 $artifactsFolder = (Get-Item $artifactsFolder).FullName
+Write-Host "Folder: $artifactsFolder"
+
 Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $artifactsFolder -WarningAction SilentlyContinue | ForEach-Object {
 
     $appFolder = $_
@@ -29,7 +36,7 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $ar
     $appJsonFile = (Get-Item (Join-Path $artifactsFolder "$appFolder\app.json")).FullName
     $appJson = Get-Content $appJsonFile | ConvertFrom-Json
 
-    if ($selectedEnvironment.Type -eq "AzureVM") {
+    if ($deploymentType -eq "AzureVM") {
     
         . (Join-Path $PSScriptRoot "SessionFunctions.ps1")
     
@@ -49,7 +56,7 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $ar
     
             if ($useSession) {
                 $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
-                $vmSession = New-PSSession -ComputerName $selectedEnvironment.ComputerName -Credential $vmCredential -UseSSL -SessionOption $sessionOption
+                $vmSession = New-PSSession -ComputerName $azureVM -Credential $vmCredential -UseSSL -SessionOption $sessionOption
                 $tempAppFile = CopyFileToSession -session $vmSession -localFile $appFile
                 $sessionArgument = @{ "Session" = $vmSession }
             }
@@ -79,10 +86,10 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $ar
 
                 Install-NavContainerApp -containerName $containerName -appName $appJson.name -appVersion $appJson.version
     
-            } -ArgumentList $selectedEnvironment.ContainerName, $tempAppFile, $credential
+            } -ArgumentList $containerName, $tempAppFile, $credential
         }
         catch [System.Management.Automation.Remoting.PSRemotingTransportException] {
-            throw "Could not connect to $($selectedEnvironment.ComputerName). Maybe port 5986 (WinRM) is not open for your IP address $myip"
+            throw "Could not connect to $azureVM. Maybe port 5986 (WinRM) is not open for your IP address $myip"
         }
         finally {
             if ($vmSession) {
@@ -93,9 +100,9 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $ar
             }
         }
     }
-    else {
+    elseif ($deploymentType -eq "onlineTenant") {
     
-        $baseUrl = $selectedEnvironment.Url.TrimEnd('/')
+        $baseUrl = $apiBaseUrl.TrimEnd('/')
         Write-Host "Base Url: $baseurl"
         
         # Get company id (of any company in the tenant)​

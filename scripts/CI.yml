@@ -110,11 +110,18 @@ stages:
         testResultsFiles: TestResults.xml
         failTaskOnFailedTests: false
     
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: app'
+    - task: PowerShell@2
+      displayName: 'Copy deployment scripts'
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)\app'
-        ArtifactName: app
+        targetType: inline
+        script: 'Copy-Item -Path scripts\Deploy-App.ps1 -Destination $(Build.ArtifactStagingDirectory); Copy-Item -Path scripts\SessionFunctions.ps1 -Destination $(Build.ArtifactStagingDirectory)'
+        failOnStderr: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: output
     
     - task: PowerShell@2
       displayName: 'Remove Build Container'
