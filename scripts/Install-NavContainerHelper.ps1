@@ -1,16 +1,19 @@
 ﻿Param(
     [ValidateSet('AzureDevOps','Local','AzureVM')]
-    [Parameter(Mandatory=$false)]
-    [string] $run = "AzureDevOps",
+    [string] $buildEnv = "AzureDevOps",
 
     [Parameter(Mandatory=$false)]
-    [string] $navContainerHelperPath = "",
+    [string] $navContainerHelperPath = $env:navContainerHelperPath,
 
     [Parameter(Mandatory=$false)]
-    [string] $navContainerHelperVersion = "latest"
+    [string] $navContainerHelperVersion = $env:navContainerHelperVersion
 )
 
-if ($run -ne "AzureDevOps" -and $navContainerHelperPath -ne "" -and (Test-Path $navContainerHelperPath)) {
+if (-not $navContainerHelperVersion) { $navContainerHelperVersion = "latest" }
+
+Write-Host "Version: $navContainerHelperVersion"
+
+if ($navContainerHelperPath -ne "" -and (Test-Path $navContainerHelperPath)) {
 
     Write-Host "Using NavContainerHelper from $navContainerHelperPath"
     . $navContainerHelperPath

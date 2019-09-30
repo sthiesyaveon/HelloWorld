@@ -1,16 +1,13 @@
 ﻿Param(
     [ValidateSet('AzureDevOps','Local','AzureVM')]
     [Parameter(Mandatory=$false)]
-    [string] $run = "AzureDevOps",
+    [string] $buildEnv = "AzureDevOps",
 
-    [Parameter(Mandatory=$true)]
-    [string] $containerName,
+    [Parameter(Mandatory=$false)]
+    [string] $containerName = $ENV:CONTAINERNAME,
 
-    [Parameter(Mandatory=$true)]
-    [pscredential] $credential,
-
-    [Parameter(Mandatory=$true)]
-    [string] $buildArtifactFolder,
+    [Parameter(Mandatory=$false)]
+    [string] $buildArtifactFolder = $ENV:BUILD_ARTIFACTSTAGINGDIRECTORY,
 
     [Parameter(Mandatory=$true)]
     [string] $appFolders,
@@ -20,7 +17,7 @@
 
 Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
     Write-Host "Publishing $_"
-    Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) | ForEach-Object {
+    Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) -Filter "*.app" | ForEach-Object {
         Publish-NavContainerApp -containerName $containerName -appFile $_.FullName -skipVerification:$skipVerification -sync -install
     }
 }

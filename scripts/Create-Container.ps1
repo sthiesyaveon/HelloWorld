@@ -1,24 +1,33 @@
 ﻿Param(
     [ValidateSet('AzureDevOps','Local','AzureVM')]
     [Parameter(Mandatory=$false)]
-    [string] $run = "AzureDevOps",
+    [string] $buildenv = "AzureDevOps",
 
-    [Parameter(Mandatory=$true)]
-    [string] $containerName,
+    [Parameter(Mandatory=$false)]
+    [string] $containerName = $ENV:CONTAINERNAME,
 
-    [Parameter(Mandatory=$true)]
-    [string] $imageName,
+    [Parameter(Mandatory=$false)]
+    [string] $imageName = $ENV:IMAGENAME,
 
-    [Parameter(Mandatory=$true)]
-    [pscredential] $credential,
+    [Parameter(Mandatory=$false)]
+    [pscredential] $credential = $null,
 
     [Parameter(Mandatory=$false)]
     [securestring] $licenseFile = $null,
 
-    [switch] $alwaysPull,
+    [bool] $alwaysPull = ($ENV:ALWAYSPULL -eq "True"),
 
-    [switch] $reuseContainer
+    [bool] $reuseContainer = ($ENV:REUSECONTAINER -eq "True")
 )
+
+if (-not ($credential)) {
+    $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
+    $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
+}
+
+if (-not ($licenseFile)) {
+    $licenseFile = try { $ENV:LICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:LICENSEFILE -AsPlainText -Force }
+}
 
 Write-Host "Create $containerName from $imageName"
 
@@ -34,11 +43,11 @@ if ($licenseFile) {
     }
 }
 
-if ($run -eq "Local") {
+if ($buildenv -eq "Local") {
     $workspaceFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
     $additionalParameters = @("--volume ""${workspaceFolder}:C:\Source""") 
 }
-elseif ($run -eq "AzureDevOps") {
+elseif ($buildenv -eq "AzureDevOps") {
     $segments = "$PSScriptRoot".Split('\')
     $rootFolder = "$($segments[0])\$($segments[1])"
     $additionalParameters = @("--volume ""$($rootFolder):C:\Agent""")

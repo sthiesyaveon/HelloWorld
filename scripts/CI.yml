@@ -1,108 +1,124 @@
-variables:
-  build.clean: all
-  platform: x64
-  version: "current"
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    variables:
+      build.clean: all
+      platform: x64
+      version: "current"
+      appVersion: "1.0"
+      appBuild: $[counter(variables['appVersion'],0)]
+      appRevision: 0
 
-resources:
-- repo: self
+    pool:
+      name: Default
 
-pool:
-  name: Default
+    steps:
+    - task: PowerShell@2
+      displayName: 'Reading Settings'
+      inputs:
+        targetType: filePath
+        filePath: 'scripts\Read-Settings.ps1'
+        failOnStderr: true
+    
+    - task: PowerShell@2
+      displayName: 'Login to bcinsider repository'
+      condition: and(succeeded(),or(eq(variables['version'],'nextminor'),eq(variables['version'],'nextmajor')))
+      inputs:
+        targetType: inline
+        script: 'docker login "bcinsider.azurecr.io" -u "$(bcInsiderUsername)" -p "$(bcinsiderPassword)"'
+        failOnStderr: true
+    
+    - task: PowerShell@2
+      displayName: 'Install NavContainerHelper'
+      inputs:
+        targetType: filePath
+        filePath: 'scripts\Install-NavContainerHelper.ps1'
+        failOnStderr: true
+    
+    - task: PowerShell@2
+      displayName: 'Create Build Container'
+      env:
+        Password: $(Password)
+        LicenseFile: $(LicenseFile)
+      inputs:
+        targetType: filePath
+        filePath: 'scripts\Create-Container.ps1'
+        failOnStderr: true
 
-trigger:
-- master
-
-steps:
-- task: PowerShell@2
-  displayName: 'Reading Settings'
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Read-Settings.ps1'
-    arguments: '-version "$(version)" -buildProjectFolder "$(Build.Repository.LocalPath)"'
-
-- task: PowerShell@2
-  displayName: 'Login to bcinsider repository'
-  condition: and(succeeded(),or(eq(variables['version'],'nextminor'),eq(variables['version'],'nextmajor')))
-  inputs:
-    targetType: inline
-    script: 'docker login "bcinsider.azurecr.io" -u "$(bcInsiderUsername)" -p "$(bcinsiderPassword)"'
-
-- task: PowerShell@2
-  displayName: 'Install NavContainerHelper'
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Install-NavContainerHelper.ps1'
-    arguments: '-navContainerHelperVersion "$(navContainerHelperVersion)"'
-
-- task: PowerShell@2
-  displayName: 'Create Build Container'
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Create-Container.ps1'
-    arguments: '-containername "$(containerName)" -imageName "$(imageName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -licenseFile $(if ("$(licenseFile)") { ConvertTo-SecureString -String "$(licenseFile)" -AsPlainText -Force } else { $null }) -alwayspull:("$(alwayspull)" -eq "True") -reuseContainer:("$(reuseContainer)" -eq "True")'
-
-- task: PowerShell@2
-  displayName: 'Compile App'
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Compile-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(appFolders)"'
-    failOnStderr: true
-
-- task: PowerShell@2
-  displayName: 'Compile Test App'
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Compile-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildProjectFolder "$(Build.Repository.LocalPath)" -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -appFolders "$(testFolders)"'
-    failOnStderr: true
-
-- task: PowerShell@2
-  displayName: 'Sign App'
-  condition: and(succeeded(),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Sign-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -PfxFile (ConvertTo-SecureString -String "$(CodeSignPfxFile)" -AsPlainText -Force) -PfxPassword (ConvertTo-SecureString -String "$(CodeSignPfxPassword)" -AsPlainText -Force) -appFolders "$(appFolders)"'
-
-- task: PowerShell@2
-  displayName: 'Publish App'
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Publish-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -skipVerification:("$(CodeSignPfxFile)$(CodeSignPfxPassword)" -eq "") -appFolders "$(appFolders)"'
-
-- task: PowerShell@2
-  displayName: 'Publish Test App'
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Publish-App.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -buildArtifactFolder "$(Build.ArtifactStagingDirectory)" -skipVerification -appFolders "$(testFolders)"'
-
-- task: PowerShell@2
-  displayName: 'Run Tests'
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Run-Tests.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force))) -TestResultsFile (Join-Path "$(System.DefaultWorkingDirectory)" "TestResults.xml") -testsuite "DEFAULT"'
-  
-- task: PublishTestResults@2
-  displayName: 'Publish Test Results'
-  inputs:
-    testResultsFormat: XUnit
-    testResultsFiles: TestResults.xml
-    failTaskOnFailedTests: false
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: app'
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)\app'
-    ArtifactName: app
-
-- task: PowerShell@2
-  displayName: 'Remove Build Container'
-  condition: ne(variables['reuseContainer'],'True')
-  inputs:
-    targetType: filePath
-    filePath: 'scripts\Remove-Container.ps1'
-    arguments: '-containername "$(containerName)" -credential ([PSCredential]::new("$(Username)", (ConvertTo-SecureString -String "$(Password)" -AsPlainText -Force)))'
+    - task: PowerShell@2
+      displayName: 'Compile App'
+      env:
+        Password: $(Password)
+      inputs:
+        targetType: filePath
+        filePath: 'scripts\Compile-App.ps1'
+        arguments: '-appFolders "$(appFolders)" -appVersion "$(appVersion).$(appBuild).$(appRevision)"'
+        failOnStderr: true
+    
+    - task: PowerShell@2
+      displayName: 'Compile Test App'
+      env:
+        Password: $(Password)
+      inputs:
+        targetType: filePath
+        filePath: 'scripts\Compile-App.ps1'
+        arguments: '-appFolders "$(testFolders)" -appVersion "$(appVersion).$(appBuild).$(appRevision)"'
+        failOnStderr: true
+    
+    - task: PowerShell@2
+      displayName: 'Sign App'
+      condition: and(succeeded(),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
+      env:
+        codeSignPfxFile: $(CodeSignPfxFile)
+        codeSignPfxPassword: $(CodeSignPfxPassword)
+      inputs:
+        targetType: filePath
+        filePath: 'scripts\Sign-App.ps1'
+        arguments: '-appFolders "$(appFolders)"'
+        failOnStderr: true
+    
+    - task: PowerShell@2
+      displayName: 'Publish App'
+      inputs:
+        targetType: filePath
+        filePath: 'scripts\Publish-App.ps1'
+        arguments: '-appFolders "$(appFolders)" -skipVerification:("$(CodeSignPfxFile)$(CodeSignPfxPassword)" -eq "")'
+        failOnStderr: true
+    
+    - task: PowerShell@2
+      displayName: 'Publish Test App'
+      inputs:
+        targetType: filePath
+        filePath: 'scripts\Publish-App.ps1'
+        arguments: '-appFolders "$(testFolders)" -skipVerification'
+        failOnStderr: true
+    
+    - task: PowerShell@2
+      displayName: 'Run Tests'
+      env:
+        Password: $(Password)
+      inputs:
+        targetType: filePath
+        filePath: 'scripts\Run-Tests.ps1'
+        failOnStderr: true
+      
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFormat: XUnit
+        testResultsFiles: TestResults.xml
+        failTaskOnFailedTests: false
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: app'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)\app'
+        ArtifactName: app
+    
+    - task: PowerShell@2
+      displayName: 'Remove Build Container'
+      condition: ne(variables['reuseContainer'],'True')
+      inputs:
+        targetType: filePath
+        filePath: 'scripts\Remove-Container.ps1'

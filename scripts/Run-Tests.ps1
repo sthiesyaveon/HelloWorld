@@ -1,33 +1,39 @@
 ﻿Param(
     [ValidateSet('AzureDevOps','Local','AzureVM')]
     [Parameter(Mandatory=$false)]
-    [string] $run = "AzureDevOps",
-
-    [Parameter(Mandatory=$true)]
-    [string] $containerName,
+    [string] $buildEnv = "AzureDevOps",
 
     [Parameter(Mandatory=$false)]
-    [string] $testSuite = "Default",
+    [string] $containerName = $ENV:CONTAINERNAME,
 
-    [Parameter(Mandatory=$true)]
-    [pscredential] $credential,
+    [Parameter(Mandatory=$false)]
+    [string] $testSuite = "DEFAULT",
 
-    [Parameter(Mandatory=$true)]
-    [string] $testResultsFile,
+    [Parameter(Mandatory=$false)]
+    [pscredential] $credential = $null,
+
+    [Parameter(Mandatory=$false)]
+    [string] $testResultsFile = (Join-Path $ENV:BUILD_REPOSITORY_LOCALPATH "TestResults.xml"),
 
     [switch] $reRunFailedTests
 )
 
+if (-not ($credential)) {
+    $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
+    $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
+}
+
 $TempTestResultFile = "C:\ProgramData\NavContainerHelper\Extensions\$containerName\Test Results.xml"
 
-$tests = Get-TestsFromBCContainer -containerName $containerName `
-                                  -credential $credential `
-                                  -ignoreGroups `
-                                  -testSuite $testSuite `
-                                  -usePublicWebBaseUrl:($run -eq "AzureVM")
+$tests = Get-TestsFromBCContainer `
+    -containerName $containerName `
+    -credential $credential `
+    -ignoreGroups `
+    -testSuite $testSuite `
+    -usePublicWebBaseUrl:($buildEnv -eq "AzureVM")
 
 $azureDevOpsParam = @{}
-if ($run -eq "AzureDevOps") {
+if ($buildEnv -eq "AzureDevOps") {
     $azureDevOpsParam = @{ "AzureDevOps" = "Warning" }
 }
 
@@ -35,27 +41,29 @@ $rerunTests = @()
 $failedTests = @()
 $first = $true
 $tests | % {
-    if (-not (Run-TestsInBcContainer @AzureDevOpsParam -containerName $containerName `
-                                     -credential $credential `
-                                     -XUnitResultFileName $TempTestResultFile `
-                                     -AppendToXUnitResultFile:(!$first) `
-                                     -testCodeunit $_.Id `
-                                     -returnTrueIfAllPassed `
-                                     -usePublicWebBaseUrl:($run -eq "AzureVM") `
-                                     -restartContainerAndRetry)) { $rerunTests += $_ }
+    if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
+        -containerName $containerName `
+        -credential $credential `
+        -XUnitResultFileName $TempTestResultFile `
+        -AppendToXUnitResultFile:(!$first) `
+        -testCodeunit $_.Id `
+        -returnTrueIfAllPassed `
+        -usePublicWebBaseUrl:($buildEnv -eq "AzureVM") `
+        -restartContainerAndRetry)) { $rerunTests += $_ }
     $first = $false
 }
 if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
     Restart-BCContainer -containerName $containername
     $rerunTests | % {
-        if (-not (Run-TestsInBcContainer @AzureDevOpsParam -containerName $containerName `
-                                         -credential $credential `
-                                         -XUnitResultFileName $TempTestResultFile `
-                                         -AppendToXUnitResultFile:(!$first) `
-                                         -testCodeunit $_.Id `
-                                         -returnTrueIfAllPassed `
-                                         -usePublicWebBaseUrl:($run -eq "AzureVM") `
-                                         -restartContainerAndRetry)) { $failedTests += $_ }
+        if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
+            -containerName $containerName `
+            -credential $credential `
+            -XUnitResultFileName $TempTestResultFile `
+            -AppendToXUnitResultFile:(!$first) `
+            -testCodeunit $_.Id `
+            -returnTrueIfAllPassed `
+            -usePublicWebBaseUrl:($buildEnv -eq "AzureVM") `
+            -restartContainerAndRetry)) { $failedTests += $_ }
         $first = $false
     }
 }

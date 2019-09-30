@@ -1,9 +1,13 @@
 Param(
+    [ValidateSet('AzureDevOps','Local','AzureVM')]
     [Parameter(Mandatory=$false)]
-    [string] $version = "",
+    [string] $buildEnv = "AzureDevOps",
 
-    [Parameter(Mandatory=$true)]
-    [string] $buildProjectFolder
+    [Parameter(Mandatory=$false)]
+    [string] $version = $ENV:VERSION,
+
+    [Parameter(Mandatory=$false)]
+    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH
 )
 
 $settings = (Get-Content (Join-Path $buildProjectFolder "scripts\settings.json") | ConvertFrom-Json)

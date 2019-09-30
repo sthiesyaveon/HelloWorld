@@ -1,12 +1,9 @@
 ﻿Param(
     [ValidateSet('AzureDevOps','Local','AzureVM')]
-    [string] $run = "AzureDevOps",
+    [string] $buildEnv = "AzureDevOps",
 
-    [Parameter(Mandatory=$true)]
-    [string] $containerName,
-
-    [Parameter(Mandatory=$true)]
-    [pscredential] $credential
+    [Parameter(Mandatory=$false)]
+    [string] $containerName = $ENV:CONTAINERNAME
 )
 
 Remove-NavContainer -containerName $containerName

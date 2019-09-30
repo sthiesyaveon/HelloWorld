@@ -1,6 +1,12 @@
-﻿. ".\Initialize.ps1"
+﻿cd $PSScriptRoot
+
+. ".\Initialize.ps1"
 
 $containername = "$($settings.name)-dev"
+$name = Read-Host -Prompt "Enter name of container (enter for $containerName)"
+if ($name) {
+    $containername = $name
+}
 
 $azureVM = $userProfile.AzureVM
 $azureVmCredential = New-Object PSCredential $azureVM.Username, ($azureVM.Password | ConvertTo-SecureString)
@@ -19,11 +25,10 @@ try {
         $ErrorActionPreference = "Stop"
         cd (Join-Path $ProjectRoot "scripts")
 
-        $run = "AzureVM"
-        $navContainerHelperPath = "C:\DEMO\navcontainerhelper-dev\NavContainerHelper.ps1"
-
-        . ".\Install-NavContainerHelper.ps1" -run $run -navContainerHelperPath $navContainerHelperPath
-        . ".\Create-Container.ps1"           -run $run -containerName $containerName -imageName $imageversion.containerImage -credential $credential -licensefile $licensefile -alwaysPull:($imageversion.alwaysPull)
+        $buildEnv = "AzureVM"
+        
+        . ".\Install-NavContainerHelper.ps1" -buildEnv $buildEnv -navContainerHelperPath $navContainerHelperPath
+        . ".\Create-Container.ps1"           -buildEnv $buildEnv -containerName $containerName -imageName $imageversion.containerImage -credential $credential -licensefile $licensefile -alwaysPull:($imageversion.alwaysPull)
 
     } -ArgumentList $vmFolder, $containerName, $imageVersion, $credential, $tempLicenseFile, $settings
 
@@ -44,4 +49,4 @@ finally {
     }
 }
 
-UpdateLaunchJson -name "AzureVM Sandbox" -server "https://$($azureVM.ComputerName)" -port 443 -serverInstance "$($containername)dev"
+UpdateLaunchJson -name "AzureVM Sandbox $containername" -server "https://$($azureVM.ComputerName)" -port 443 -serverInstance "$($containername)dev"

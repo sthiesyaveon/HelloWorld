@@ -1,3 +1,5 @@
+cd $PSScriptRoot
+
 . ".\Initialize.ps1"
 
 $containername = "$($settings.name)-bld"
@@ -27,7 +29,7 @@ try {
 
         cd (Join-Path $ProjectRoot "scripts")
 
-        $run = "AzureVM"
+        $buildEnv = "AzureVM"
         $navContainerHelperPath = "C:\DEMO\navcontainerhelper-dev\NavContainerHelper.ps1"
 
         $buildArtifactFolder = Join-Path $ProjectRoot ".output"
@@ -38,17 +40,17 @@ try {
         if (Test-Path $alPackagesFolder) { Remove-Item $alPackagesFolder -Force -Recurse }
         New-Item -Path $alPackagesFolder -ItemType Directory -Force | Out-Null
 
-        . ".\Install-NavContainerHelper.ps1" -run $run -navContainerHelperPath $navContainerHelperPath
-        . ".\Create-Container.ps1"           -run $run -ContainerName $containerName -imageName $imageVersion.containerImage -alwaysPull:($imageversion.alwaysPull) -Credential $credential -licenseFile $licenseFile
-        . ".\Compile-App.ps1"                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ProjectRoot -buildSymbolsFolder $alPackagesFolder -appFolders $settings.appFolders
-        . ".\Compile-App.ps1"                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ProjectRoot -buildSymbolsFolder $alPackagesFolder -appFolders $settings.testFolders
+        . ".\Install-NavContainerHelper.ps1" -buildEnv $buildEnv -navContainerHelperPath $navContainerHelperPath
+        . ".\Create-Container.ps1"           -buildEnv $buildEnv -ContainerName $containerName -imageName $imageVersion.containerImage -alwaysPull:($imageversion.alwaysPull) -Credential $credential -licenseFile $licenseFile
+        . ".\Compile-App.ps1"                -buildEnv $buildEnv -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ProjectRoot -buildSymbolsFolder $alPackagesFolder -appFolders $settings.appFolders
+        . ".\Compile-App.ps1"                -buildEnv $buildEnv -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ProjectRoot -buildSymbolsFolder $alPackagesFolder -appFolders $settings.testFolders
         if ($CodeSignPfxFile) {
-            . ".\Sign-App.ps1"               -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -appFolders $settings.appFolders -pfxFile $CodeSignPfxFile -pfxPassword $CodeSignPfxPassword
+            . ".\Sign-App.ps1"               -buildEnv $buildEnv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -appFolders $settings.appFolders -pfxFile $CodeSignPfxFile -pfxPassword $CodeSignPfxPassword
         }
-        . ".\Publish-App.ps1"                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -appFolders $settings.appFolders -skipVerification:(!($CodeSignPfxFile))
-        . ".\Publish-App.ps1"                -run $run -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -appFolders $settings.testFolders -skipVerification
-        . ".\Run-Tests.ps1"                  -run $run -ContainerName $containerName -Credential $credential -testResultsFile (Join-Path $buildArtifactFolder "TestResults.xml")
-        . ".\Remove-Container.ps1"           -run $run -ContainerName $containerName -Credential $credential
+        . ".\Publish-App.ps1"                -buildEnv $buildEnv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -appFolders $settings.appFolders -skipVerification:(!($CodeSignPfxFile))
+        . ".\Publish-App.ps1"                -buildEnv $buildEnv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -appFolders $settings.testFolders -skipVerification
+        . ".\Run-Tests.ps1"                  -buildEnv $buildEnv -ContainerName $containerName -Credential $credential -testResultsFile (Join-Path $buildArtifactFolder "TestResults.xml")
+        . ".\Remove-Container.ps1"           -buildEnv $buildEnv -ContainerName $containerName
 
     } -ArgumentList $vmFolder, $containerName, $imageVersion, $credential, $tempLicenseFile, $settings, $tempCodeSignPfxFile, $codeSignPfxPassword
     
