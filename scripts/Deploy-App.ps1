@@ -79,12 +79,12 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $ar
                     }
                 }
 
-                Publish-NavContainerApp -containerName $containerName -appFile $appFile -skipVerification -sync -scope Tenant
+                Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -sync -scope Tenant
                 if ($appExists) {
-                    Start-NavContainerAppDataUpgrade -containerName $containerName -appName $appJson.name -appVersion $appJson.version
+                    Start-BCContainerAppDataUpgrade -containerName $containerName -appName $appJson.name -appVersion $appJson.version
                 }
 
-                Install-NavContainerApp -containerName $containerName -appName $appJson.name -appVersion $appJson.version
+                Install-BCContainerApp -containerName $containerName -appName $appJson.name -appVersion $appJson.version
     
             } -ArgumentList $containerName, $tempAppFile, $credential
         }

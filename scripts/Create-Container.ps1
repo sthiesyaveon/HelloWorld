@@ -66,7 +66,7 @@ else {
 
 }
 
-$restoreDb = $reuseContainer -and (Test-NavContainer -containerName $containerName)
+$restoreDb = $reuseContainer -and (Test-BCContainer -containerName $containerName)
 if ($restoreDb) {
     try {
         Restore-DatabasesInBCContainer -containerName $containerName -bakFolder $containerName
@@ -76,19 +76,19 @@ if ($restoreDb) {
     }
 }
 if (!$restoreDb) {
-    New-NavContainer @Parameters `
-                     -doNotCheckHealth `
-                     -updateHosts `
-                     -useBestContainerOS `
-                     -containerName $containerName `
-                     -imageName $imageName `
-                     -alwaysPull:$alwaysPull `
-                     -auth "UserPassword" `
-                     -Credential $credential `
-                     -additionalParameters $additionalParameters `
-                     -includeTestToolkit `
-                     -includeTestLibrariesOnly `
-                     -doNotUseRuntimePackages
+    New-BCContainer @Parameters `
+                    -doNotCheckHealth `
+                    -updateHosts `
+                    -useBestContainerOS `
+                    -containerName $containerName `
+                    -imageName $imageName `
+                    -alwaysPull:$alwaysPull `
+                    -auth "UserPassword" `
+                    -Credential $credential `
+                    -additionalParameters $additionalParameters `
+                    -includeTestToolkit `
+                    -includeTestLibrariesOnly `
+                    -doNotUseRuntimePackages
     
-    Backup-NavContainerDatabases -containerName $containerName -bakFolder $containerName
+    Backup-BCContainerDatabases -containerName $containerName -bakFolder $containerName
 }

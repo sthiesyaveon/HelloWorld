@@ -31,6 +31,6 @@ $unsecurepfxFile = ([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([S
 $appFolders.Split(',') | ForEach-Object {
     Write-Host "Signing $_"
     Get-ChildItem -Path (Join-Path $buildArtifactFolder $_) -Filter "*.app" | ForEach-Object {
-        Sign-NavContainerApp -containerName $containerName -appFile $_.FullName -pfxFile $unsecurePfxFile -pfxPassword $codeSignPfxPassword
+        Sign-BCContainerApp -containerName $containerName -appFile $_.FullName -pfxFile $unsecurePfxFile -pfxPassword $codeSignPfxPassword
     }
 }

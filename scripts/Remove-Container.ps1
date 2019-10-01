@@ -6,4 +6,4 @@
     [string] $containerName = $ENV:CONTAINERNAME
 )
 
-Remove-NavContainer -containerName $containerName
+Remove-BCContainer -containerName $containerName
