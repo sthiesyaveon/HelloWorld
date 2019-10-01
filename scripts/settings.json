@@ -1,6 +1,6 @@
 {
     "name": "helloworld",
-    "navContainerHelperVersion": "0.6.4.5",
+    "navContainerHelperVersion": "latest",
     "appFolders": "app,base",
     "testFolders": "test",
     "launch" :{
