@@ -19,6 +19,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: 'scripts\Read-Settings.ps1'
+        arguments: '-appVersion "$(appVersion).$(appBuild).$(appRevision)"'
         failOnStderr: true
     
     - task: PowerShell@2

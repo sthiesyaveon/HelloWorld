@@ -7,8 +7,15 @@ Param(
     [string] $version = $ENV:VERSION,
 
     [Parameter(Mandatory=$false)]
-    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH
+    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
+
+    [Parameter(Mandatory=$false)]
+    [string] $appVersion = ""
 )
+
+if ($appVersion) {
+    write-host "##vso[build.updatebuildnumber]$appVersion"
+}
 
 $settings = (Get-Content (Join-Path $buildProjectFolder "scripts\settings.json") | ConvertFrom-Json)
 if ("$version" -eq "")  {
