@@ -9,11 +9,12 @@ codeunit 50131 "HelloWorld Test Install"
         SuiteName: Code[10];
     begin
         SuiteName := 'DEFAULT';
-        if not ALTestSuite.Get(SuiteName) then begin
-            TestSuiteMgt.CreateTestSuite(SuiteName);
-            Commit();
-            ALTestSuite.Get(SuiteName);
-        end;
+        if ALTestSuite.Get(SuiteName) then
+            ALTestSuite.DELETE(true);
+
+        TestSuiteMgt.CreateTestSuite(SuiteName);
+        Commit();
+        ALTestSuite.Get(SuiteName);
         TestSuiteMgt.SelectTestMethodsByRange(ALTestSuite, '50133..50133');
     end;
 }
