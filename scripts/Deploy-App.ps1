@@ -79,12 +79,12 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $ar
                     }
                 }
 
-                Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -sync -scope Tenant
+                Publish-NavContainerApp -containerName $containerName -appFile $appFile -skipVerification -sync -scope Tenant
                 if ($appExists) {
-                    Start-BCContainerAppDataUpgrade -containerName $containerName -appName $appJson.name -appVersion $appJson.version
+                    Start-NavContainerAppDataUpgrade -containerName $containerName -appName $appJson.name -appVersion $appJson.version
                 }
 
-                Install-BCContainerApp -containerName $containerName -appName $appJson.name -appVersion $appJson.version
+                Install-NavContainerApp -containerName $containerName -appName $appJson.name -appVersion $appJson.version
     
             } -ArgumentList $containerName, $tempAppFile, $credential
         }
@@ -139,20 +139,29 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $ar
         # Monitor publishing progress
         $inprogress = $true
         $completed = $false
+        $errCount = 0
         while ($inprogress)
         {
             Start-Sleep -Seconds 5
-            $extensionDeploymentStatusResponse = Invoke-WebRequest `
-                -Method Get `
-                -Uri "$baseUrl/microsoft/automation/v1.0/companies($companyId)/extensionDeploymentStatus" `
-                -Credential $credential
-            $extensionDeploymentStatuses = (ConvertFrom-Json $extensionDeploymentStatusResponse.Content).value
-            $inprogress = $false
-            $completed = $true
-            $extensionDeploymentStatuses | Where-Object { $_.publisher -eq $appJson.publisher -and $_.name -eq $appJson.name -and $_.appVersion -eq $appJson.version } | % {
-                Write-Host " - $($_.startedOn) $($_.operationType) $($_.status) $($_.appVersion) $($_.name)"
-                if ($_.status -eq "InProgress") { $inProgress = $true }
-                if ($_.status -ne "Completed") { $completed = $false }
+            try {
+                $extensionDeploymentStatusResponse = Invoke-WebRequest `
+                    -Method Get `
+                    -Uri "$baseUrl/microsoft/automation/v1.0/companies($companyId)/extensionDeploymentStatus" `
+                    -Credential $credential
+                $extensionDeploymentStatuses = (ConvertFrom-Json $extensionDeploymentStatusResponse.Content).value
+                $inprogress = $false
+                $completed = $true
+                $extensionDeploymentStatuses | Where-Object { $_.publisher -eq $appJson.publisher -and $_.name -eq $appJson.name -and $_.appVersion -eq $appJson.version } | % {
+                    Write-Host " - $($_.name) $($_.appVersion) $($_.operationType) $($_.status)"
+                    if ($_.status -eq "InProgress") { $inProgress = $true }
+                    if ($_.status -ne "Completed") { $completed = $false }
+                }
+                $errCount = 0
+            }
+            catch {
+                if ($errCount++ -gt 3) {
+                    $inprogress = $false
+                }
             }
         }
         if (!$completed) {
