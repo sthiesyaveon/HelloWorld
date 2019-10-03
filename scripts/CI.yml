@@ -108,7 +108,7 @@ stages:
       inputs:
         testResultsFormat: XUnit
         testResultsFiles: TestResults.xml
-        failTaskOnFailedTests: false
+        failTaskOnFailedTests: true
     
     - task: PowerShell@2
       displayName: 'Copy deployment scripts'
