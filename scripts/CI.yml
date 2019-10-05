@@ -9,7 +9,7 @@ stages:
       appVersion: "1.0"
       appBuild: $[counter(variables['appVersion'],0)]
       appRevision: 0
-      createRuntimePackages: True
+      createRuntimePackages: False
       skipComponentGovernanceDetection: True
 
     pool:
