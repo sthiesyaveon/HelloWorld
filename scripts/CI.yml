@@ -119,7 +119,7 @@ stages:
     
     - task: PowerShell@2
       displayName: 'Get App RuntimePackage'
-      condition: and(succeeded(),variables['createRuntimePackages'])
+      condition: and(succeeded(),eq(variables['createRuntimePackages'],'True'))
       inputs:
         targetType: filePath
         filePath: 'scripts\Get-AppRuntimePackage.ps1'
@@ -128,7 +128,7 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Sign RuntimePackage'
-      condition: and(succeeded(),variables['createRuntimePackages'],ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
+      condition: and(succeeded(),eq(variables['createRuntimePackages'],'True'),ne(variables['CodeSignPfxFile'],''),ne(variables['CodeSignPfxPassword'],''))
       env:
         codeSignPfxFile: $(CodeSignPfxFile)
         codeSignPfxPassword: $(CodeSignPfxPassword)
