@@ -34,12 +34,9 @@ else {
 $property = $settings.PSObject.Properties.Match('navContainerHelperVersion')
 if ($property.Value) {
     $navContainerHelperVersion = $property.Value
+    Write-Host "Set navContainerHelperVersion = $navContainerHelperVersion"
+    Write-Host "##vso[task.setvariable variable=navContainerHelperVersion]$navContainerHelperVersion"
 }
-else {
-    $navContainerHelperVersion = "latest"
-}
-Write-Host "Set navContainerHelperVersion = $navContainerHelperVersion"
-Write-Host "##vso[task.setvariable variable=navContainerHelperVersion]$navContainerHelperVersion"
 
 $appFolders = $settings.appFolders
 Write-Host "Set appFolders = $appFolders"
