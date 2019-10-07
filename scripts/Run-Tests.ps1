@@ -29,8 +29,7 @@ $tests = Get-TestsFromBCContainer `
     -containerName $containerName `
     -credential $credential `
     -ignoreGroups `
-    -testSuite $testSuite `
-    -usePublicWebBaseUrl:($buildEnv -eq "AzureVM")
+    -testSuite $testSuite
 
 $azureDevOpsParam = @{}
 if ($buildEnv -eq "AzureDevOps") {
@@ -48,7 +47,6 @@ $tests | % {
         -AppendToXUnitResultFile:(!$first) `
         -testCodeunit $_.Id `
         -returnTrueIfAllPassed `
-        -usePublicWebBaseUrl:($buildEnv -eq "AzureVM") `
         -restartContainerAndRetry)) { $rerunTests += $_ }
     $first = $false
 }
@@ -62,7 +60,6 @@ if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
             -AppendToXUnitResultFile:(!$first) `
             -testCodeunit $_.Id `
             -returnTrueIfAllPassed `
-            -usePublicWebBaseUrl:($buildEnv -eq "AzureVM") `
             -restartContainerAndRetry)) { $failedTests += $_ }
         $first = $false
     }
