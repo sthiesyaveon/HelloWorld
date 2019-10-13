@@ -23,12 +23,11 @@ if ("$version" -eq "")  {
     Write-Host "Version not defined, using $version"
 }
 
+$containerName = "build"
+
 $property = $settings.PSObject.Properties.Match('containerName')
 if ($property.Value) {
     $containerName = $property.Value
-}
-else {
-    $containerName = "$($settings.Name)-bld"
 }
 
 $property = $settings.PSObject.Properties.Match('navContainerHelperVersion')
@@ -69,5 +68,6 @@ else {
     throw "Unknown version: $version"
 }
 
+$containerName = "$($ENV:AGENT_NAME)-$containerName"
 Write-Host "Set containerName = $containerName"
 Write-Host "##vso[task.setvariable variable=containerName]$containerName"
