@@ -4,13 +4,13 @@
                            {
                                "type":  "al",
                                "request":  "launch",
-                               "name":  "Local Sandbox",
+                               "name":  "Local Sandbox (helloworld-dev)",
                                "server":  "http://helloworld-dev",
                                "serverInstance":  "BC",
                                "port":  7049,
                                "tenant":  "",
                                "authentication":  "UserPassword",
-                               "startupObjectId":  130451,
+                               "startupObjectId":  22,
                                "startupObjectType":  "Page",
                                "breakOnError":  true
                            }

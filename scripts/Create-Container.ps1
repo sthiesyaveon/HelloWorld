@@ -70,6 +70,18 @@ $restoreDb = $reuseContainer -and (Test-BCContainer -containerName $containerNam
 if ($restoreDb) {
     try {
         Restore-DatabasesInBCContainer -containerName $containerName -bakFolder $containerName
+        Invoke-ScriptInBCContainer -containerName $containerName -scriptBlock { Param([pscredential]$credential)
+            $user = Get-NAVServerUser -ServerInstance $ServerInstance | Where-Object { $_.Username -eq $credential.UserName }
+            if ($user) {
+                Write-Host "Setting Password for user: $($credential.UserName)"
+                Set-NavServerUser -ServerInstance $ServerInstance -UserName $credential.UserName -Password $credential.Password
+            }
+            else {
+                Write-Host "Creating user: $($credential.UserName)"
+                New-NavServerUser -ServerInstance $ServerInstance -UserName $credential.UserName -Password $credential.Password
+                New-NavServerUserPermissionSet -ServerInstance $ServerInstance -UserName $credential.UserName -PermissionSetId "SUPER"
+            }
+        } -argumentList $credential
     }
     catch {
         $restoreDb = $false
