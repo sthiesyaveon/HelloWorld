@@ -39,12 +39,13 @@ if ($buildEnv -eq "AzureDevOps") {
 $rerunTests = @()
 $failedTests = @()
 $first = $true
-$tests | % {
+$tests | ForEach-Object {
     if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
         -containerName $containerName `
         -credential $credential `
         -XUnitResultFileName $TempTestResultFile `
         -AppendToXUnitResultFile:(!$first) `
+        -testSuite $testSuite `
         -testCodeunit $_.Id `
         -returnTrueIfAllPassed `
         -restartContainerAndRetry)) { $rerunTests += $_ }
@@ -58,6 +59,7 @@ if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
             -credential $credential `
             -XUnitResultFileName $TempTestResultFile `
             -AppendToXUnitResultFile:(!$first) `
+            -testSuite $testSuite `
             -testCodeunit $_.Id `
             -returnTrueIfAllPassed `
             -restartContainerAndRetry)) { $failedTests += $_ }
