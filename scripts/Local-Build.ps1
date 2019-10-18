@@ -22,7 +22,7 @@ New-Item -Path $alPackagesFolder -ItemType Directory -Force | Out-Null
 if ($CodeSignPfxFile) {
     . ".\scripts\Sign-App.ps1"       -buildenv $buildenv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -appFolders $settings.appFolders -pfxFile $CodeSignPfxFile -pfxPassword $CodeSignPfxPassword
 }
-. ".\Publish-App.ps1"                -buildenv $buildenv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -appFolders $settings.appFolders -skipVerification:(!($CodeSignPfxFile))
-. ".\Publish-App.ps1"                -buildenv $buildenv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -appFolders $settings.testFolders -skipVerification
-. ".\Run-Tests.ps1"                  -buildenv $buildenv -ContainerName $containerName -Credential $credential -testResultsFile (Join-Path $buildArtifactFolder "TestResults.xml")
+. ".\Publish-App.ps1"                -buildenv $buildenv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ProjectRoot -appFolders $settings.appFolders -skipVerification:(!($CodeSignPfxFile))
+. ".\Publish-App.ps1"                -buildenv $buildenv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ProjectRoot -appFolders $settings.testFolders -skipVerification
+. ".\Run-Tests.ps1"                  -buildenv $buildenv -ContainerName $containerName -Credential $credential -testResultsFile (Join-Path $buildArtifactFolder "TestResults.xml") -buildProjectFolder $ProjectRoot -appFolders $settings.testFolders
 . ".\Remove-Container.ps1"           -buildenv $buildenv -ContainerName $containerName

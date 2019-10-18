@@ -107,6 +107,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: 'scripts\Run-Tests.ps1'
+        arguments: '-appFolders "$(testFolders)"'
         failOnStderr: true
       
     - task: PublishTestResults@2

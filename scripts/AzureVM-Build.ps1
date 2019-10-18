@@ -47,9 +47,9 @@ try {
         if ($CodeSignPfxFile) {
             . ".\Sign-App.ps1"               -buildEnv $buildEnv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -appFolders $settings.appFolders -pfxFile $CodeSignPfxFile -pfxPassword $CodeSignPfxPassword
         }
-        . ".\Publish-App.ps1"                -buildEnv $buildEnv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -appFolders $settings.appFolders -skipVerification:(!($CodeSignPfxFile))
-        . ".\Publish-App.ps1"                -buildEnv $buildEnv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -appFolders $settings.testFolders -skipVerification
-        . ".\Run-Tests.ps1"                  -buildEnv $buildEnv -ContainerName $containerName -Credential $credential -testResultsFile (Join-Path $buildArtifactFolder "TestResults.xml")
+        . ".\Publish-App.ps1"                -buildEnv $buildEnv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ProjectRoot -appFolders $settings.appFolders -skipVerification:(!($CodeSignPfxFile))
+        . ".\Publish-App.ps1"                -buildEnv $buildEnv -ContainerName $containerName -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ProjectRoot -appFolders $settings.testFolders -skipVerification
+        . ".\Run-Tests.ps1"                  -buildEnv $buildEnv -ContainerName $containerName -Credential $credential -testResultsFile (Join-Path $buildArtifactFolder "TestResults.xml") -buildProjectFolder $ProjectRoot -appFolders $settings.testFolders
         . ".\Remove-Container.ps1"           -buildEnv $buildEnv -ContainerName $containerName
 
     } -ArgumentList $vmFolder, $containerName, $imageVersion, $credential, $tempLicenseFile, $settings, $tempCodeSignPfxFile, $codeSignPfxPassword

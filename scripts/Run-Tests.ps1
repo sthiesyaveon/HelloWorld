@@ -10,6 +10,12 @@
     [string] $testSuite = "DEFAULT",
 
     [Parameter(Mandatory=$false)]
+    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
+
+    [Parameter(Mandatory=$false)]
+    [string] $appFolders = "",
+
+    [Parameter(Mandatory=$false)]
     [pscredential] $credential = $null,
 
     [Parameter(Mandatory=$false)]
@@ -24,36 +30,46 @@ if (-not ($credential)) {
 }
 
 $TempTestResultFile = "C:\ProgramData\NavContainerHelper\Extensions\$containerName\Test Results.xml"
+$globalDisabledTests = @()
+$disabledTestsFile = Join-Path $buildProjectFolder "disabledTests.json"
+if (Test-Path $disabledTestsFile) {
+    $globalDisabledTests = Get-Content $disabledTestsFile | ConvertTo-Json
+}
 
-$tests = Get-TestsFromBCContainer `
-    -containerName $containerName `
-    -credential $credential `
-    -ignoreGroups `
-    -testSuite $testSuite
+$rerunTests = @()
+$failedTests = @()
+$first = $true
 
 $azureDevOpsParam = @{}
 if ($buildEnv -eq "AzureDevOps") {
     $azureDevOpsParam = @{ "AzureDevOps" = "Warning" }
 }
 
-$rerunTests = @()
-$failedTests = @()
-$first = $true
-$tests | ForEach-Object {
-    if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
+Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $buildProjectFolder -WarningAction SilentlyContinue | ForEach-Object {
+
+    $appFolder = $_
+    $disabledTests = $globalDisabledTests
+    $getTestsParam = @{}
+    if ($appFolder) {
+        $appProjectFolder = Join-Path $buildProjectFolder $appFolder
+        $appJson = Get-Content -Path (Join-Path $appProjectFolder "app.json") | ConvertFrom-Json
+        $getTestsParam += @{ "ExtensionId" = "$($appJson.Id)" }
+        $disabledTestsFile = Join-Path $appProjectFolder "disabledTests.json"
+        if (Test-Path $disabledTestsFile) {
+            $disabledTests += Get-Content $disabledTestsFile | ConvertFrom-Json
+        }
+    }
+    if ($disabledTests) {
+        $getTestsParam += @{ "DisabledTests" = $disabledTests }
+    }
+
+    $tests = Get-TestsFromBCContainer @getTestsParam `
         -containerName $containerName `
         -credential $credential `
-        -XUnitResultFileName $TempTestResultFile `
-        -AppendToXUnitResultFile:(!$first) `
-        -testSuite $testSuite `
-        -testCodeunit $_.Id `
-        -returnTrueIfAllPassed `
-        -restartContainerAndRetry)) { $rerunTests += $_ }
-    $first = $false
-}
-if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
-    Restart-BCContainer -containerName $containername
-    $rerunTests | % {
+        -ignoreGroups `
+        -testSuite $testSuite -debugMode
+    
+    $tests | ForEach-Object {
         if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
             -containerName $containerName `
             -credential $credential `
@@ -62,8 +78,23 @@ if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
             -testSuite $testSuite `
             -testCodeunit $_.Id `
             -returnTrueIfAllPassed `
-            -restartContainerAndRetry)) { $failedTests += $_ }
+            -restartContainerAndRetry)) { $rerunTests += $_ }
         $first = $false
+    }
+    if ($rerunTests.Count -gt 0 -and $reRunFailedTests) {
+        Restart-BCContainer -containerName $containername
+        $rerunTests | % {
+            if (-not (Run-TestsInBcContainer @AzureDevOpsParam `
+                -containerName $containerName `
+                -credential $credential `
+                -XUnitResultFileName $TempTestResultFile `
+                -AppendToXUnitResultFile:(!$first) `
+                -testSuite $testSuite `
+                -testCodeunit $_.Id `
+                -returnTrueIfAllPassed `
+                -restartContainerAndRetry)) { $failedTests += $_ }
+            $first = $false
+        }
     }
 }
 
