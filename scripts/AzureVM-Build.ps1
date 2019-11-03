@@ -9,7 +9,8 @@ if (Test-Path $buildArtifactFolder) { Remove-Item $buildArtifactFolder -Force -R
 New-Item -Path $buildArtifactFolder -ItemType Directory -Force | Out-Null
 
 $azureVM = $userProfile.AzureVM
-$azureVmCredential = New-Object PSCredential $azureVM.Username, ($azureVM.Password | ConvertTo-SecureString)
+$securePassword = try { ($azureVM.Password | ConvertTo-SecureString) } catch { ($azureVM.Password | ConvertTo-SecureString -AsPlainText -Force) }
+$azureVmCredential = New-Object PSCredential $azureVM.Username, $securePassword
 $sessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck
 $vmSession = $null
 $tempLicenseFile = ""

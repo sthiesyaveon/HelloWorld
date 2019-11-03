@@ -43,7 +43,7 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $ar
         $useSession = $true
         try { 
             $myip = ""; $myip = (Invoke-WebRequest -Uri http://ifconfig.me/ip).Content
-            $targetip = (Resolve-DnsName "freddyk.northeurope.cloudapp.azure.com").IP4Address
+            $targetip = (Resolve-DnsName $azureVM).IP4Address
             if ($myip -eq $targetip) {
                 $useSession = $false
             }
@@ -79,12 +79,12 @@ Sort-AppFoldersByDependencies -appFolders $appFolders.Split(',') -baseFolder $ar
                     }
                 }
 
-                Publish-NavContainerApp -containerName $containerName -appFile $appFile -skipVerification -sync -scope Tenant
+                Publish-BCContainerApp -containerName $containerName -appFile $appFile -skipVerification -sync -scope Tenant
                 if ($appExists) {
-                    Start-NavContainerAppDataUpgrade -containerName $containerName -appName $appJson.name -appVersion $appJson.version
+                    Start-BCContainerAppDataUpgrade -containerName $containerName -appName $appJson.name -appVersion $appJson.version
                 }
 
-                Install-NavContainerApp -containerName $containerName -appName $appJson.name -appVersion $appJson.version
+                Install-BCContainerApp -containerName $containerName -appName $appJson.name -appVersion $appJson.version
     
             } -ArgumentList $containerName, $tempAppFile, $credential
         }

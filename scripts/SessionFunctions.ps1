@@ -8,7 +8,7 @@
         [object[]] $argumentList
     )
 
-    Invoke-Command -Session $vmSession -ScriptBlock ([ScriptBlock]::Create([System.IO.File]::ReadAllText($filename))) -ArgumentList $argumentList
+    Invoke-Command -Session $session -ScriptBlock ([ScriptBlock]::Create([System.IO.File]::ReadAllText($filename))) -ArgumentList $argumentList
 }
 
 function CopyFileToSession {
@@ -25,7 +25,7 @@ function CopyFileToSession {
         }
         if ($localfile -notlike "https://*" -and $localfile -notlike "http://*") {
             $tempFilename = "c:\demo\$([Guid]::NewGuid().ToString())"
-            Copy-Item -ToSession $vmSession -Path $localFile -Destination $tempFilename
+            Copy-Item -ToSession $session -Path $localFile -Destination $tempFilename
             $localfile = $tempFilename
         }
         if ($returnSecureString) {
