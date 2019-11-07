@@ -68,6 +68,6 @@ else {
     throw "Unknown version: $version"
 }
 
-$containerName = "$($ENV:AGENT_NAME)-$containerName"
+$containerName = "$($ENV:AGENT_NAME.Replace(' ',''))-$containerName"
 Write-Host "Set containerName = $containerName"
 Write-Host "##vso[task.setvariable variable=containerName]$containerName"
