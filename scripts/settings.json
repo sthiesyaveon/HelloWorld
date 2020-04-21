@@ -10,7 +10,7 @@
     "versions": [
         {
             "version": "current",
-            "containerImage": "mcr.microsoft.com/businesscentral/onprem:1910-rtm-w1",
+            "containerImage": "mcr.microsoft.com/businesscentral/onprem:2004-rtm-w1",
             "reuseContainer": true
         },
         {
