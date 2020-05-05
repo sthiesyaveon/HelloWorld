@@ -22,6 +22,6 @@ codeunit 50133 "HelloWorld Test"
     end;
 
     var
-        Assert: Codeunit Assert;
+        Assert: Codeunit "Library Assert";
         MessageDisplayed: Boolean;
 }
