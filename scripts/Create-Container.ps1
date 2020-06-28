@@ -10,6 +10,9 @@
     [string] $imageName = $ENV:IMAGENAME,
 
     [Parameter(Mandatory=$false)]
+    [string] $artifact = $null,
+
+    [Parameter(Mandatory=$false)]
     [pscredential] $credential = $null,
 
     [Parameter(Mandatory=$false)]
@@ -20,6 +23,23 @@
     [bool] $reuseContainer = ($ENV:REUSECONTAINER -eq "True")
 )
 
+if (-not ($artifact)) {
+    $artifact = $ENV:ARTIFACT
+}
+if ($artifact -like 'https://*') {
+    $artifactUrl = $artifact
+    if ($env:InsiderSasToken) {
+        $artifactUrl += $env:InsiderSasToken
+    }
+}
+else {
+    $segments = "$artifact/////".Split('/')
+    $artifactUrl = Get-BCArtifactUrl -storageAccount $segments[0] -type $segments[1] -version $segments[2] -country $segments[3] -select $segments[4] -sasToken $env:InsiderSasToken | Select-Object -First 1
+    if (-not ($artifactUrl)) {
+        throw "Unable to locate artifactUrl from $artifact"
+    }
+}
+
 if (-not ($credential)) {
     $securePassword = try { $ENV:PASSWORD | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:PASSWORD -AsPlainText -Force }
     $credential = New-Object PSCredential -ArgumentList $ENV:USERNAME, $SecurePassword
@@ -29,7 +49,7 @@ if (-not ($licenseFile)) {
     $licenseFile = try { $ENV:LICENSEFILE | ConvertTo-SecureString } catch { ConvertTo-SecureString -String $ENV:LICENSEFILE -AsPlainText -Force }
 }
 
-Write-Host "Create $containerName from $imageName"
+Write-Host "Create $containerName from $($artifactUrl.split('?')[0])"
 
 $parameters = @{
     "Accept_Eula" = $true
@@ -60,13 +80,12 @@ else {
     $additionalParameters = @("--volume ""C:\DEMO:C:\DEMO""")
     $parameters += @{ 
         "shortcuts" = "None"
-        "useTraefik" = $true
         "myscripts" = @(@{ "AdditionalOutput.ps1" = "copy-item -Path 'C:\Run\*.vsix' -Destination 'C:\ProgramData\navcontainerhelper\Extensions\$containerName' -force" })
     }
 
 }
 
-$restoreDb = $reuseContainer -and (Test-BCContainer -containerName $containerName)
+$restoreDb = $reuseContainer -and (!$alwaysPull) -and (Test-BCContainer -containerName $containerName)
 if ($restoreDb) {
     try {
         Restore-DatabasesInBCContainer -containerName $containerName -bakFolder $containerName
@@ -87,20 +106,25 @@ if ($restoreDb) {
         $restoreDb = $false
     }
 }
+if ($imageName) {
+    $parameters += @{ "imageName" = $imageName }
+}
 if (!$restoreDb) {
     New-BCContainer @Parameters `
                     -doNotCheckHealth `
                     -updateHosts `
-                    -useBestContainerOS `
                     -containerName $containerName `
-                    -imageName $imageName `
+                    -artifactUrl $artifactUrl `
                     -alwaysPull:$alwaysPull `
                     -auth "UserPassword" `
                     -Credential $credential `
                     -additionalParameters $additionalParameters `
                     -includeTestToolkit `
-                    -includeTestLibrariesOnly `
-                    -doNotUseRuntimePackages
+                    -includeTestFrameworkOnly `
+                    -doNotUseRuntimePackages `
+                    -enableTaskScheduler:$false
     
-    Backup-BCContainerDatabases -containerName $containerName -bakFolder $containerName
+    if ($reuseContainer) {
+        Backup-BCContainerDatabases -containerName $containerName -bakFolder $containerName
+    }
 }

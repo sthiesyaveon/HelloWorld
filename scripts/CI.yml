@@ -13,7 +13,7 @@ stages:
       skipComponentGovernanceDetection: True
 
     pool:
-      name: Default
+      vmImage: Windows-2019
 
     steps:
     - task: PowerShell@2

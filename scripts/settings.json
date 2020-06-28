@@ -10,18 +10,21 @@
     "versions": [
         {
             "version": "current",
-            "containerImage": "mcr.microsoft.com/businesscentral/onprem:2004-rtm-w1",
-            "reuseContainer": true
+            "artifact": "bcartifacts/sandbox/16.2.13509.14082/us/Latest",
+            "imageName": "ci",
+            "reuseContainer": false
         },
         {
             "version": "nextminor",
-            "containerImage": "bcinsider.azurecr.io/bcsandbox:base",
-            "alwaysPull": true
+            "artifact": "bcinsider/sandbox//us/SecondToLastMajor",
+            "imageName": "nextminor",
+            "alwaysPull": false
         },
         {
             "version": "nextmajor",
-            "containerImage": "bcinsider.azurecr.io/bcsandbox-master:base",
-            "alwaysPull": true
+            "artifact": "bcinsider/sandbox//us/Latest",
+            "imageName": "nextmajor",
+            "alwaysPull": false
         }
     ],
     "userProfiles": [

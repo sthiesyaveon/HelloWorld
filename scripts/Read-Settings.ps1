@@ -23,19 +23,21 @@ if ("$version" -eq "")  {
     Write-Host "Version not defined, using $version"
 }
 
-$containerName = "build"
-
-$property = $settings.PSObject.Properties.Match('containerName')
+$imageName = "build"
+$property = $settings.PSObject.Properties.Match('imageName')
 if ($property.Value) {
-    $containerName = $property.Value
+    $imageName = $property.Value
 }
 
 $property = $settings.PSObject.Properties.Match('navContainerHelperVersion')
 if ($property.Value) {
     $navContainerHelperVersion = $property.Value
-    Write-Host "Set navContainerHelperVersion = $navContainerHelperVersion"
-    Write-Host "##vso[task.setvariable variable=navContainerHelperVersion]$navContainerHelperVersion"
 }
+else {
+    $navContainerHelperVersion = "latest"
+}
+Write-Host "Set navContainerHelperVersion = $navContainerHelperVersion"
+Write-Host "##vso[task.setvariable variable=navContainerHelperVersion]$navContainerHelperVersion"
 
 $appFolders = $settings.appFolders
 Write-Host "Set appFolders = $appFolders"
@@ -47,8 +49,8 @@ Write-Host "##vso[task.setvariable variable=testFolders]$testFolders"
 
 $imageversion = $settings.versions | Where-Object { $_.version -eq $version }
 if ($imageversion) {
-    Write-Host "Set imageName = $($imageVersion.containerImage)"
-    Write-Host "##vso[task.setvariable variable=imageName]$($imageVersion.containerImage)"
+    Write-Host "Set artifact = $($imageVersion.artifact)"
+    Write-Host "##vso[task.setvariable variable=artifact]$($imageVersion.artifact)"
     "alwaysPull","reuseContainer" | ForEach-Object {
         $property = $imageVersion.PSObject.Properties.Match($_)
         if ($property.Value) {
@@ -60,14 +62,22 @@ if ($imageversion) {
         Write-Host "Set $_ = $propertyValue"
         Write-Host "##vso[task.setvariable variable=$_]$propertyValue"
     }
-    if ($imageVersion.PSObject.Properties.Match("containerName").Value) {
-        $containerName = $imageversion.containerName
+    if ($imageVersion.PSObject.Properties.Match("imageName").Value) {
+        $imageName = $imageversion.imageName
     }
 }
 else {
     throw "Unknown version: $version"
 }
 
-$containerName = "$($ENV:AGENT_NAME.Replace(' ',''))-$containerName"
+if ("$($ENV:AGENT_NAME)" -eq "Hosted Agent" -or "$($ENV:AGENT_NAME)" -like "Azure Pipelines*") {
+    Write-Host "Set imageName = ''"
+    Write-Host "##vso[task.setvariable variable=imageName]"
+}
+else {
+    Write-Host "Set imageName = $imageName"
+    Write-Host "##vso[task.setvariable variable=imageName]$imageName"
+}
+$containerName = "$("$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')-$imageName"
 Write-Host "Set containerName = $containerName"
 Write-Host "##vso[task.setvariable variable=containerName]$containerName"
