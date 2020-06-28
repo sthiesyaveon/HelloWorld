@@ -38,7 +38,7 @@ if (-not ($imageversion.PSObject.Properties.Name -eq "reuseContainer")) {
     $imageversion | Add-Member -NotePropertyName reuseContainer -NotePropertyValue $false
 }
 if (-not ($imageversion.PSObject.Properties.Name -eq "imageName")) {
-    $imageversion | Add-Member -NotePropertyName reuseContainer -NotePropertyValue $false
+    $imageversion | Add-Member -NotePropertyName imageName -NotePropertyValue $false
 }
 
 if ($userProfile.licenseFilePath) {
