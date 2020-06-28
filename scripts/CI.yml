@@ -25,14 +25,6 @@ stages:
         failOnStderr: true
     
     - task: PowerShell@2
-      displayName: 'Login to bcinsider repository'
-      condition: and(succeeded(),or(eq(variables['version'],'nextminor'),eq(variables['version'],'nextmajor')))
-      inputs:
-        targetType: inline
-        script: 'docker login "bcinsider.azurecr.io" -u "$(bcInsiderUsername)" -p "$(bcinsiderPassword)"'
-        failOnStderr: true
-    
-    - task: PowerShell@2
       displayName: 'Install NavContainerHelper'
       inputs:
         targetType: filePath

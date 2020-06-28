@@ -16,7 +16,7 @@ if ($name) {
     -buildEnv Local `
     -containerName $containerName `
     -artifact $imageversion.artifact `
-    -imageName $imageversion.imageName `
+    -imageName $imageVersion.imageName `
     -credential $credential `
     -licensefile $licensefile
 

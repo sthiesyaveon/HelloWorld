@@ -11,8 +11,7 @@
         {
             "version": "current",
             "artifact": "bcartifacts/sandbox/16.2.13509.14082/us/Latest",
-            "imageName": "ci",
-            "reuseContainer": false
+            "imageName": "ci"
         },
         {
             "version": "nextminor",
