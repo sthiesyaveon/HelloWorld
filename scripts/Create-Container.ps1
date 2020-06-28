@@ -18,8 +18,6 @@
     [Parameter(Mandatory=$false)]
     [securestring] $licenseFile = $null,
 
-    [bool] $alwaysPull = ($ENV:ALWAYSPULL -eq "True"),
-
     [bool] $reuseContainer = ($ENV:REUSECONTAINER -eq "True")
 )
 
@@ -85,7 +83,7 @@ else {
 
 }
 
-$restoreDb = $reuseContainer -and (!$alwaysPull) -and (Test-BCContainer -containerName $containerName)
+$restoreDb = $reuseContainer -and (Test-BCContainer -containerName $containerName)
 if ($restoreDb) {
     try {
         Restore-DatabasesInBCContainer -containerName $containerName -bakFolder $containerName
@@ -115,7 +113,6 @@ if (!$restoreDb) {
                     -updateHosts `
                     -containerName $containerName `
                     -artifactUrl $artifactUrl `
-                    -alwaysPull:$alwaysPull `
                     -auth "UserPassword" `
                     -Credential $credential `
                     -additionalParameters $additionalParameters `

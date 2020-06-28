@@ -34,10 +34,10 @@ $imageversion = $settings.versions | Where-Object { $_.version -eq $version }
 if (!($imageversion)) {
     throw "No version for $version in settings.json"
 }
-if (-not ($imageversion.PSObject.Properties -match "alwaysPull")) {
-    $imageversion | Add-Member -NotePropertyName alwaysPull -NotePropertyValue $false
+if (-not ($imageversion.PSObject.Properties.Name -eq "reuseContainer")) {
+    $imageversion | Add-Member -NotePropertyName reuseContainer -NotePropertyValue $false
 }
-if (-not ($imageversion.PSObject.Properties -match "reuseContainer")) {
+if (-not ($imageversion.PSObject.Properties.Name -eq "imageName")) {
     $imageversion | Add-Member -NotePropertyName reuseContainer -NotePropertyValue $false
 }
 

@@ -29,7 +29,7 @@ try {
         $buildEnv = "AzureVM"
         
         . ".\Install-NavContainerHelper.ps1" -buildEnv $buildEnv -navContainerHelperPath $navContainerHelperPath
-        . ".\Create-Container.ps1"           -buildEnv $buildEnv -containerName $containerName -imageName $imageversion.containerImage -credential $credential -licensefile $licensefile -alwaysPull:($imageversion.alwaysPull)
+        . ".\Create-Container.ps1"           -buildEnv $buildEnv -containerName $containerName -artifact $imageversion.artifact -imageName $imageversion.imageName -credential $credential -licensefile $licensefile
 
     } -ArgumentList $vmFolder, $containerName, $imageVersion, $credential, $tempLicenseFile, $settings
 

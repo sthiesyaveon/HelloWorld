@@ -42,7 +42,7 @@ try {
         New-Item -Path $alPackagesFolder -ItemType Directory -Force | Out-Null
 
         . ".\Install-NavContainerHelper.ps1" -buildEnv $buildEnv -navContainerHelperPath $navContainerHelperPath
-        . ".\Create-Container.ps1"           -buildEnv $buildEnv -ContainerName $containerName -imageName $imageVersion.containerImage -alwaysPull:($imageversion.alwaysPull) -Credential $credential -licenseFile $licenseFile
+        . ".\Create-Container.ps1"           -buildEnv $buildEnv -ContainerName $containerName -artifact $imageVersion.artifact -imageName $imageVersion.imageName -Credential $credential -licenseFile $licenseFile
         . ".\Compile-App.ps1"                -buildEnv $buildEnv -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ProjectRoot -buildSymbolsFolder $alPackagesFolder -appFolders $settings.appFolders
         . ".\Compile-App.ps1"                -buildEnv $buildEnv -ContainerName $containerName -Credential $credential -buildArtifactFolder $buildArtifactFolder -buildProjectFolder $ProjectRoot -buildSymbolsFolder $alPackagesFolder -appFolders $settings.testFolders
         if ($CodeSignPfxFile) {

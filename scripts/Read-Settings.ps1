@@ -51,7 +51,7 @@ $imageversion = $settings.versions | Where-Object { $_.version -eq $version }
 if ($imageversion) {
     Write-Host "Set artifact = $($imageVersion.artifact)"
     Write-Host "##vso[task.setvariable variable=artifact]$($imageVersion.artifact)"
-    "alwaysPull","reuseContainer" | ForEach-Object {
+    "reuseContainer" | ForEach-Object {
         $property = $imageVersion.PSObject.Properties.Match($_)
         if ($property.Value) {
             $propertyValue = $property.Value

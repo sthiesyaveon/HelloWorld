@@ -9,6 +9,6 @@ if ($name) {
 }
 
 . ".\Install-NavContainerHelper.ps1" -buildEnv Local -navContainerHelperPath $userProfile.navContainerHelperPath
-. ".\Create-Container.ps1"           -buildEnv Local -containerName $containerName -imageName $imageversion.containerImage -credential $credential -licensefile $licensefile -alwaysPull:($imageversion.alwaysPull)
+. ".\Create-Container.ps1"           -buildEnv Local -containerName $containerName -artifact $imageversion.artifact -imageName $imageversion.imageName -credential $credential -licensefile $licensefile
 
 UpdateLaunchJson -name "Local Sandbox ($containername)" -server "http://$containername"

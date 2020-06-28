@@ -17,14 +17,12 @@
         {
             "version": "nextminor",
             "artifact": "bcinsider/sandbox//us/SecondToLastMajor",
-            "imageName": "nextminor",
-            "alwaysPull": false
+            "imageName": "nextminor"
         },
         {
             "version": "nextmajor",
             "artifact": "bcinsider/sandbox//us/Latest",
-            "imageName": "nextmajor",
-            "alwaysPull": false
+            "imageName": "nextmajor"
         }
     ],
     "userProfiles": [
