@@ -71,13 +71,20 @@ else {
 }
 
 if ("$($ENV:AGENT_NAME)" -eq "Hosted Agent" -or "$($ENV:AGENT_NAME)" -like "Azure Pipelines*") {
+    $containerNamePrefix = ""
     Write-Host "Set imageName = ''"
     Write-Host "##vso[task.setvariable variable=imageName]"
 }
 else {
+    if ($imageName -eq "") {
+        $containerNamePrefix = "bld-"
+    }
+    else {
+        $containerNamePrefix = "$imageName-"
+    }
     Write-Host "Set imageName = $imageName"
     Write-Host "##vso[task.setvariable variable=imageName]$imageName"
 }
-$containerName = "$("$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')-$imageName"
+$containerName = "$($containerNamePrefix)$("$($ENV:AGENT_NAME)" -replace '[^a-zA-Z0-9]', '')"
 Write-Host "Set containerName = $containerName"
 Write-Host "##vso[task.setvariable variable=containerName]$containerName"
