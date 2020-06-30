@@ -33,6 +33,6 @@ Get-ChildItem -Path $path | Where-Object { $_.psIsContainer -and $_.Name -notlik
     Write-Host -ForegroundColor Yellow $appJsonFile
     ReplaceObject -object $appJson
     Write-Host "Check Dependencies"
-    $appJson.dependencies | % { ReplaceObject($_) }
+    $appJson.dependencies | ForEach-Object { ReplaceObject($_) }
     $appJson | ConvertTo-Json -Depth 10 | Set-Content $appJsonFile
 }
