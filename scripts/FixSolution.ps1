@@ -11,6 +11,23 @@ $replaceValues = @{
     "1.0.0.0" = "2.0.0.0"
 }
 
+$launchJson = [ordered]@{
+    "version" = "0.2.0"
+    "configurations" = @([ordered]@{
+        "type" =  "al"
+        "request" =  "launch"
+        "name" = "My sandbox environment"
+        "server" = "https://fksandtest.northeurope.cloudapp.azure.com"
+        "serverInstance" = "BC"
+        "port" = 7049
+        "tenant" = ""
+        "authentication" = "UserPassword"
+        "startupObjectId" = 22
+        "startupObjectType" = "Page"
+        "breakOnError" = $true
+    })
+}
+
 function ReplaceProperty { Param ($object, $property)
     if ($object.PSObject.Properties.name -eq $property) {
         $str = $object."$property"
@@ -35,4 +52,12 @@ Get-ChildItem -Path $path | Where-Object { $_.psIsContainer -and $_.Name -notlik
     Write-Host "Check Dependencies"
     $appJson.dependencies | ForEach-Object { ReplaceObject($_) }
     $appJson | ConvertTo-Json -Depth 10 | Set-Content $appJsonFile
+}
+
+Get-ChildItem -Path $path | Where-Object { $_.psIsContainer -and $_.Name -notlike ".*" } | Get-ChildItem -Recurse -filter "launch.json" | ForEach-Object {
+    $launchJsonFile = $_.FullName
+    $existingLaunchJson = Get-Content $launchJsonFile | ConvertFrom-Json
+    Write-Host -ForegroundColor Yellow $launchJsonFile
+    $launchJson.configurations[0].startupObjectId = $existinglaunchJson.configurations[0].startupObjectId
+    $launchJson | ConvertTo-Json -Depth 10 | Set-Content $launchJsonFile
 }
