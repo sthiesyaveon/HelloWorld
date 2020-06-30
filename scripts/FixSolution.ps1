@@ -1,16 +1,5 @@
 ﻿$path = Join-Path $PSScriptRoot ".."
 
-$replaceValues = @{
-    "00000000-0000-0000-0000-000000000001" = [Guid]::NewGuid().ToString()
-    "00000000-0000-0000-0000-000000000002" = [Guid]::NewGuid().ToString()
-    "00000000-0000-0000-0000-000000000003" = [Guid]::NewGuid().ToString()
-    "Default Publisher" = "My Name"
-    "Default App Name" = "My App"
-    "Default Base App Name" = "My Base App"
-    "Default Test App Name" = "My Test App"
-    "1.0.0.0" = "2.0.0.0"
-}
-
 $launchJson = [ordered]@{
     "version" = "0.2.0"
     "configurations" = @([ordered]@{
@@ -26,6 +15,17 @@ $launchJson = [ordered]@{
         "startupObjectType" = "Page"
         "breakOnError" = $true
     })
+}
+
+$replaceValues = @{
+    "00000000-0000-0000-0000-000000000001" = [Guid]::NewGuid().ToString()
+    "00000000-0000-0000-0000-000000000002" = [Guid]::NewGuid().ToString()
+    "00000000-0000-0000-0000-000000000003" = [Guid]::NewGuid().ToString()
+    "Default Publisher" = "My Name"
+    "Default App Name" = "My App"
+    "Default Base App Name" = "My Base App"
+    "Default Test App Name" = "My Test App"
+    "1.0.0.0" = "2.0.0.0"
 }
 
 function ReplaceProperty { Param ($object, $property)
