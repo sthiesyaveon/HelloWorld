@@ -6,7 +6,7 @@ $launchJson = [ordered]@{
         "type" =  "al"
         "request" =  "launch"
         "name" = "My sandbox environment"
-        "server" = "https://fksandtest.northeurope.cloudapp.azure.com"
+        "server" = "https://fkartdemo.westeurope.cloudapp.azure.com"
         "serverInstance" = "BC"
         "port" = 7049
         "tenant" = ""
@@ -61,3 +61,53 @@ Get-ChildItem -Path $path | Where-Object { $_.psIsContainer -and $_.Name -notlik
     $launchJson.configurations[0].startupObjectId = $existinglaunchJson.configurations[0].startupObjectId
     $launchJson | ConvertTo-Json -Depth 10 | Set-Content $launchJsonFile
 }
+
+if (Test-Path 'c:\demo\settings.ps1') {
+    . 'c:\demo\settings.ps1'
+
+    $securePassword = ConvertTo-SecureString -String $adminPassword -Key $passwordKey
+    $credential = New-Object System.Management.Automation.PSCredential($navAdminUsername, $securePassword)
+
+    if (Test-NavContainer $containerName) {
+        $tempProjectFolder = "c:\programdata\navcontainerhelper\$([Guid]::NewGuid().ToString())"
+        New-Item -Path $tempProjectFolder -ItemType Directory | Out-Null
+        $appFolders = @()
+        Get-ChildItem -Path $path | Where-Object { $_.psIsContainer -and $_.Name -notlike ".*" -and (Test-Path (Join-Path $_.FullName "app.json")) } | ForEach-Object {
+            $appFolders += @($_.Name)
+            Copy-Item -Path $_.FullName -Destination $tempProjectFolder -Recurse -Force
+        }
+
+        $appFolders = Sort-AppFoldersByDependencies -baseFolder $tempProjectFolder -appFolders $appFolders
+
+        $appFolders | ForEach-Object {
+            $appFile = Compile-AppInBCContainer `
+                -containerName $containerName `
+                -credential $credential `
+                -appProjectFolder (Join-Path $tempProjectFolder $_) `
+                -appOutputFolder  (Join-Path $tempProjectFolder $_) `
+                -appSymbolsFolder (Join-Path $tempProjectFolder "$_\.alPackages") `
+                -UpdateSymbols
+            if ($appFile) {
+                Publish-BCContainerApp `
+                    -containerName $containerName `
+                    -appFile $appFile `
+                    -skipVerification `
+                    -sync `
+                    -install `
+                    -useDevEndpoint `
+                    -credential $credential
+            }
+        }
+
+        Get-ChildItem $tempProjectFolder -Recurse | ForEach-Object {
+            $srcpath = $_.FullName
+            if ($srcpath -like "$($tempProjectFolder)*") {
+                $destPath = Join-Path $path $srcPath.Substring($tempProjectFolder.Length)
+                if (!(Test-Path $destPath)) {
+                    Copy-Item -Path $srcPath -Destination $destPath -Force
+                }
+            }
+        }
+    }
+}
+
