@@ -1,5 +1,12 @@
-trigger:
-- master
+trigger: none
+
+schedules:
+- cron: '0 0 * * *'
+  displayName: Daily Next Minor build
+  branches:
+    include:
+    - master
+  always: true
 
 pool:
   name: default
@@ -14,11 +21,14 @@ stages:
     variables:
       build.clean: all
       platform: x64
-      version: "current"
+      version: "nextminor"
       appBuild: $[counter(variables['appVersion'],0)]
       appRevision: 0
       createRuntimePackages: True
       skipComponentGovernanceDetection: True
+
+    pool:
+      name: default
 
     steps:
     - task: PowerShell@2
@@ -26,7 +36,7 @@ stages:
       inputs:
         targetType: filePath
         filePath: 'scripts\Read-Settings.ps1'
-        arguments: '-version "$(version)" -appVersion "$(appVersion).$(appBuild).$(appRevision)"'
+        arguments: '-version "$(Version)"'
         failOnStderr: true
     
     - task: PowerShell@2
@@ -47,7 +57,6 @@ stages:
       inputs:
         targetType: filePath
         filePath: 'scripts\DevOps-Pipeline.ps1'
-        arguments: '-appVersion "$(appVersion).$(appBuild).$(appRevision)"'
         failOnStderr: true
 
     - task: PublishTestResults@2
