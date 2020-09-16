@@ -4,7 +4,7 @@
     "publisher":  "Default Publisher",
     "brief":  "",
     "description":  "",
-    "version":  "1.0.0.0",
+    "version":  "2.0.0.0",
     "privacyStatement":  "",
     "EULA":  "",
     "help":  "",
@@ -32,7 +32,7 @@
                          {
                              "name":  "Default App Name",
                              "publisher":  "Default Publisher",
-                             "version":  "1.0.0.0",
+                             "version":  "2.0.0.0",
                              "appId":  "00000000-0000-0000-0000-000000000001"
                          }
                      ],

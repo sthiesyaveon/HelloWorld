@@ -4,7 +4,7 @@
     "publisher":  "Default Publisher",
     "brief":  "",
     "description":  "",
-    "version":  "1.0.0.0",
+    "version":  "2.0.0.0",
     "privacyStatement":  "",
     "EULA":  "",
     "help":  "",
@@ -15,7 +15,7 @@
                              "appId":  "00000000-0000-0000-0000-000000000003",
                              "publisher":  "Default Publisher",
                              "name":  "Default Base App Name",
-                             "version":  "1.0.0.0"
+                             "version":  "2.0.0.0"
                          }
                      ],
     "screenshots":  [
