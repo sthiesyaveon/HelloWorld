@@ -21,6 +21,7 @@ $replaceValues = @{
     "00000000-0000-0000-0000-000000000001" = [Guid]::NewGuid().ToString()
     "00000000-0000-0000-0000-000000000002" = [Guid]::NewGuid().ToString()
     "00000000-0000-0000-0000-000000000003" = [Guid]::NewGuid().ToString()
+    "HelloWorld" = "MyApp"
     "Default Publisher" = "My Name"
     "Default App Name" = "My App"
     "Default Base App Name" = "My Base App"
@@ -61,3 +62,9 @@ Get-ChildItem -Path $path | Where-Object { $_.psIsContainer -and $_.Name -notlik
     $launchJson.configurations[0].startupObjectId = $existinglaunchJson.configurations[0].startupObjectId
     $launchJson | ConvertTo-Json -Depth 10 | Set-Content $launchJsonFile
 }
+
+$settingsFile = Join-Path $PSScriptRoot "settings.json"
+$settings = Get-Content $settingsFile | ConvertFrom-Json
+Write-Host -ForegroundColor Yellow $settingsFile
+ReplaceProperty -object $settings -property "name"
+$settings | ConvertTo-Json -Depth 10 | Set-Content $settingsFile

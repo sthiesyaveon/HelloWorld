@@ -1,32 +1,32 @@
 {
-    "name": "HelloWorld",
-    "memoryLimit": "6G",
-    "installApps": "",
-    "appFolders": "app,base",
-    "testFolders": "test",
-    "installTestFramework": true,
-    "installTestLibraries": false,
-    "installPerformanceToolkit": false,
-    "enableCodeCop": false,
-    "enableAppSourceCop": false,
-    "enablePerTenantExtensionCop": false,
-    "enableUICop": false,
-    "bcContainerHelperVersion": "preview",
-    "versions": [
-        {
-            "version": "current",
-            "artifact": "bcartifacts/sandbox/16.5.15897.16301/us/Latest",
-            "signapp": false
-        },
-        {
-            "version": "nextmajor",
-            "artifact": "///us/NextMajor/{INSIDERSASTOKEN}",
-            "signapp": false
-        },
-        {
-            "version": "nextminor",
-            "artifact": "///us/NextMinor/{INSIDERSASTOKEN}",
-            "signapp": false
-        }
-    ]
+    "name":  "HelloWorld",
+    "memoryLimit":  "6G",
+    "installApps":  "",
+    "appFolders":  "app,base",
+    "testFolders":  "test",
+    "installTestFramework":  true,
+    "installTestLibraries":  false,
+    "installPerformanceToolkit":  false,
+    "enableCodeCop":  false,
+    "enableAppSourceCop":  false,
+    "enablePerTenantExtensionCop":  false,
+    "enableUICop":  false,
+    "bcContainerHelperVersion":  "preview",
+    "versions":  [
+                     {
+                         "version":  "current",
+                         "artifact":  "bcartifacts/sandbox/16.5.15897.16301/us/Latest",
+                         "signapp":  false
+                     },
+                     {
+                         "version":  "nextmajor",
+                         "artifact":  "///us/NextMajor/{INSIDERSASTOKEN}",
+                         "signapp":  false
+                     },
+                     {
+                         "version":  "nextminor",
+                         "artifact":  "///us/NextMinor/{INSIDERSASTOKEN}",
+                         "signapp":  false
+                     }
+                 ]
 }
