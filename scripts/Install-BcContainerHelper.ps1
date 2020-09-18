@@ -1,9 +1,17 @@
-﻿Param(
-    [Parameter(Mandatory=$false)]
-    [string] $bcContainerHelperVersion = 'latest'
-)
+﻿[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
-[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+$settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
+if ("$version" -eq "")  {
+    $version = $settings.versions[0].version
+    Write-Host "Version not defined, using $version"
+}
+
+$bcContainerHelperVersion = "latest"
+if ($settings.PSObject.Properties.Name -eq 'bcContainerHelperVersion' -and $settings.bcContainerHelperVersion) {
+    $bcContainerHelperVersion = $settings.bcContainerHelperVersion
+}
+Write-Host "Set bcContainerHelperVersion = $bcContainerHelperVersion"
+if (!$local) { Write-Host "##vso[task.setvariable variable=bcContainerHelperVersion]$bcContainerHelperVersion" }
 
 Write-Host "Version: $bcContainerHelperVersion"
 

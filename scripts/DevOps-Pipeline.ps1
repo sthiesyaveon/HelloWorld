@@ -1,67 +1,39 @@
 ﻿Param(
-    [Parameter(Mandatory=$false)]
-    [string] $pipelineName = "$ENV:PipelineName",
-    [Parameter(Mandatory=$false)]
-    [string] $containerName = "$ENV:containerName",
-    [Parameter(Mandatory=$false)]
-    [string] $artifact = "$ENV:artifact",
-    [Parameter(Mandatory=$false)]
-    [string] $memoryLimit = "$ENV:memoryLimit",
-    [Parameter(Mandatory=$false)]
-    [string] $insiderSasToken = "$ENV:insiderSasToken",
-    [Parameter(Mandatory=$false)]
-    [string] $baseFolder = "$ENV:BUILD_REPOSITORY_LOCALPATH",
-    [Parameter(Mandatory=$false)]
-    [string] $licenseFile = "$ENV:licenseFile",
-    [Parameter(Mandatory=$false)]
-    [string] $installApps = "$ENV:installApps",
-    [Parameter(Mandatory=$false)]
-    [string] $appFolders = "$ENV:appFolders",
-    [Parameter(Mandatory=$false)]
-    [string] $testFolders = "$ENV:testFolders",
-    [Parameter(Mandatory=$false)]
-    [switch] $installTestFramework = "$ENV:installTestFramework" -eq "True",
-    [Parameter(Mandatory=$false)]
-    [switch] $installTestLibraries = "$ENV:installTestLibraries" -eq "True",
-    [Parameter(Mandatory=$false)]
-    [switch] $installPerformanceToolkit = "$ENV:installPerformanceToolkit" -eq "True",
-    [Parameter(Mandatory=$false)]
-    [switch] $enableCodeCop = "$ENV:enableCodeCop" -eq "True",
-    [Parameter(Mandatory=$false)]
-    [switch] $enableUICop = "$ENV:enableUICop" -eq "True",
-    [Parameter(Mandatory=$false)]
-    [switch] $enableAppSourceCop = "$ENV:enableAppSourceCop" -eq "True",
-    [Parameter(Mandatory=$false)]
-    [switch] $enablePerTenantExtensionCop = "$ENV:enablePerTenantExtensionCop" -eq "True",
-    [Parameter(Mandatory=$false)]
-    [string] $buildArtifactFolder = "$ENV:BUILD_ARTIFACTSTAGINGDIRECTORY",
-    [Parameter(Mandatory=$false)]
-    [switch] $signapp = "$ENV:signapp" -eq "True",
-    [Parameter(Mandatory=$false)]
-    [string] $codeSigncertPfxFile = "$ENV:CodeSignCertPfxFile",
-    [Parameter(Mandatory=$false)]
-    [securestring] $codeSignCertPfxPassword = $null,
+    [Parameter(Mandatory=$true)]
+    [string] $version,
     [Parameter(Mandatory=$false)]
     [string] $appVersion = ""
 )
 
+if ($appVersion) {
+    Write-Host "Set BuildNumber = $appVersion"
+    write-host "##vso[build.updatebuildnumber]$appVersion" 
+}
+
+$buildArtifactFolder = $ENV:BUILD_ARTIFACTSTAGINGDIRECTORY
+$baseFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
+. (Join-Path $PSScriptRoot "Read-Settings.ps1") -local -version $version
+
 $params = @{}
-if ($signapp -and $codeSigncertPfxFile -ne "") {
-    if ($codeSigncertPfxPassword) {
+$insiderSasToken = "$ENV:insiderSasToken"
+$licenseFile = "$ENV:licenseFile"
+$codeSigncertPfxFile = "$ENV:CodeSignCertPfxFile"
+if ($signapp -and $codeSigncertPfxFile) {
+    if ("$ENV:CodeSignCertPfxPassword" -ne "") {
+        $codeSignCertPfxPassword = try { "$ENV:CodeSignCertPfxPassword" | ConvertTo-SecureString } catch { ConvertTo-SecureString -String "$ENV:CodeSignCertPfxPassword" -AsPlainText -Force }
         $params = @{
             "codeSignCertPfxFile" = $codeSignCertPfxFile
             "codeSignCertPfxPassword" = $codeSignCertPfxPassword
         }
     }
     else {
-        if ("$ENV:CodeSignCertPfxPassword" -ne "") {
-            $codeSignCertPfxPassword = try { "$ENV:CodeSignCertPfxPassword" | ConvertTo-SecureString } catch { ConvertTo-SecureString -String "$ENV:CodeSignCertPfxPassword" -AsPlainText -Force }
-            $params = @{
-                "codeSignCertPfxFile" = $codeSignCertPfxFile
-                "codeSignCertPfxPassword" = $codeSignCertPfxPassword
-            }
-        }
+        $codeSignCertPfxPassword = $null
     }
+}
+
+$testResultsFile = Join-Path $baseFolder "TestResults.xml"
+if (Test-Path $testResultsFile) {
+    Remove-Item $testResultsFile -Force
 }
 
 Run-AlPipeline @params `
@@ -74,6 +46,7 @@ Run-AlPipeline @params `
     -installApps $installApps `
     -appFolders $appFolders `
     -testFolders $testFolders `
+    -testResultsFile $testResultsFile `
     -installTestFramework:$installTestFramework `
     -installTestLibraries:$installTestLibraries `
     -installPerformanceToolkit:$installPerformanceToolkit `
@@ -84,4 +57,8 @@ Run-AlPipeline @params `
     -buildArtifactFolder $buildArtifactFolder `
     -CreateRuntimePackages `
     -appVersion $appVersion
+
+if (Test-Path $testResultsFile) {
+    Write-Host "##vso[task.setvariable variable=TestResultsAvailable]True"
+}
 

@@ -1,4 +1,7 @@
-﻿$baseFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
+﻿Param(
+    [Parameter(Mandatory=$false)]
+    [string] $version = "Current"
+)
 
 $vaultName = "BuildVariables"
 $licenseFileSecret = Get-AzKeyVaultSecret -VaultName $vaultName -Name "licenseFile"
@@ -8,9 +11,8 @@ if ($insiderSasTokenSecret) { $insiderSasToken = $insiderSasTokenSecret.SecretVa
 $passwordSecret = Get-AzKeyVaultSecret -VaultName $vaultName -Name "password"
 if ($passwordSecret) { $credential = New-Object pscredential 'admin', $passwordSecret.SecretValue } else { $credential = $null }
 
-$version = "Current"
-
-. (Join-Path $PSScriptRoot "Read-Settings.ps1") -local -version $version -BuildProjectFolder $baseFolder
+$baseFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
+. (Join-Path $PSScriptRoot "Read-Settings.ps1") -local -version $version
 
 Run-AlPipeline `
     -pipelineName $pipelineName `

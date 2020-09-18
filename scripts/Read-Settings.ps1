@@ -1,40 +1,25 @@
 Param(
     [switch] $local,
 
-    [Parameter(Mandatory=$false)]
-    [string] $version = $ENV:VERSION,
-
-    [Parameter(Mandatory=$false)]
-    [string] $buildProjectFolder = $ENV:BUILD_REPOSITORY_LOCALPATH,
-
-    [Parameter(Mandatory=$false)]
-    [string] $appVersion = ""
+    [Parameter(Mandatory=$true)]
+    [string] $version
 )
 
-$agentName = $ENV:AGENT_NAME
-
-if ($appVersion) {
-    if (!$local) { write-host "##vso[build.updatebuildnumber]$appVersion" }
+$agentName = ""
+if (!$local) {
+    $agentName = $ENV:AGENT_NAME
 }
 
-$settings = (Get-Content (Join-Path $buildProjectFolder "scripts\settings.json") | ConvertFrom-Json)
+$settings = (Get-Content (Join-Path $PSScriptRoot "settings.json") | ConvertFrom-Json)
 if ("$version" -eq "")  {
     $version = $settings.versions[0].version
     Write-Host "Version not defined, using $version"
 }
 
-$bcContainerHelperVersion = "latest"
-if ($settings.PSObject.Properties.Name -eq 'bcContainerHelperVersion' -and $settings.bcContainerHelperVersion) {
-    $bcContainerHelperVersion = $settings.bcContainerHelperVersion
-}
-Write-Host "Set bcContainerHelperVersion = $bcContainerHelperVersion"
-if (!$local) { Write-Host "##vso[task.setvariable variable=bcContainerHelperVersion]$bcContainerHelperVersion" }
-
 $buildversion = $settings.versions | Where-Object { $_.version -eq $version }
 if ($buildversion) {
     Write-Host "Set artifact = $($buildVersion.artifact)"
     Set-Variable -Name "artifact" -Value $buildVersion.artifact
-    if (!$local) { Write-Host "##vso[task.setvariable variable=artifact]$($buildVersion.artifact)" }
 
     if ($buildversion.PSObject.Properties.Name -eq "signapp") {
         $signapp = $buildversion.signapp
@@ -44,7 +29,6 @@ if ($buildversion) {
     }
     Write-Host "Set signapp = $signapp"
     Set-Variable -Name "signapp" -Value $signapp
-    if (!$local) { Write-Host "##vso[task.setvariable variable=signapp]$($buildVersion.signapp)" }
 }
 else {
     throw "Unknown version: $version"
@@ -52,7 +36,6 @@ else {
 
 $pipelineName = "$($settings.Name)-$version"
 Write-Host "Set pipelineName = $pipelineName"
-if (!$local) { Write-Host "##vso[task.setvariable variable=pipelineName]$pipelineName" }
 
 if ($local -or ("$AgentName" -ne "Hosted Agent" -and "$AgentName" -notlike "Azure Pipelines*")) {
     $imageName = "bcimage"
@@ -61,16 +44,14 @@ else {
     $imageName = ""
 }
 Write-Host "Set imageName = $imageName"
-if (!$local) { Write-Host "##vso[task.setvariable variable=imageName]$imageName" }
 
-if ($agentName -and !$local) {
+if ($agentName) {
     $containerName = "$($agentName -replace '[^a-zA-Z0-9---]', '')-$($pipelineName -replace '[^a-zA-Z0-9---]', '')"
 }
 else {
     $containerName = $pipelineName.Replace('.','-') -replace '[^a-zA-Z0-9---]', ''
 }
 Write-Host "Set containerName = $containerName"
-if (!$local) { Write-Host "##vso[task.setvariable variable=containerName]$containerName" }
 
 "installApps", "appFolders", "testFolders", "memoryLimit" | ForEach-Object {
     $str = ""
@@ -79,7 +60,6 @@ if (!$local) { Write-Host "##vso[task.setvariable variable=containerName]$contai
     }
     Write-Host "Set $_ = $str"
     Set-Variable -Name $_ -Value $str
-    if (!$local) { Write-Host "##vso[task.setvariable variable=$_]$str" }
 }
 
 "installTestFramework", "installTestLibraries", "installPerformanceToolkit", "enableCodeCop", "enableAppSourceCop", "enablePerTenantExtensionCop", "enableUICop" | ForEach-Object {
@@ -89,5 +69,4 @@ if (!$local) { Write-Host "##vso[task.setvariable variable=containerName]$contai
     }
     Write-Host "Set $_ = $str"
     Set-Variable -Name $_ -Value ($str -eq "True")
-    if (!$local) { Write-Host "##vso[task.setvariable variable=$_]$str" }
 }
