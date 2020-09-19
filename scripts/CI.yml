@@ -13,7 +13,7 @@ jobs:
     build.clean: all
     platform: x64
     version: 'current'
-    appVersion: '16.0'
+    appVersion: '2.0'
     appBuild: $(Build.BuildID)
     appRevision: 0
     createRuntimePackages: True
