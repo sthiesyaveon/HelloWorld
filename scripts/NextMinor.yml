@@ -20,8 +20,6 @@ jobs:
     build.clean: all
     platform: x64
     version: "nextminor"
-    appBuild: $[counter(variables['appVersion'],0)]
-    appRevision: 0
     createRuntimePackages: True
     skipComponentGovernanceDetection: True
 
@@ -54,15 +52,10 @@ jobs:
       testResultsFiles: TestResults.xml
       failTaskOnFailedTests: true
   
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifacts'
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: output
-
   - task: PowerShell@2
     displayName: 'Cleanup'
+    condition: always()
     inputs:
       targetType: inline
-      script: 'Flush-ContainerHelperCache -KeepDays 7'
+      script: 'Remove-BcContainer -containerName $(containerName); Flush-ContainerHelperCache -KeepDays 7'
       failOnStderr: false

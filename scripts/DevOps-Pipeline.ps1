@@ -2,17 +2,14 @@
     [Parameter(Mandatory=$true)]
     [string] $version,
     [Parameter(Mandatory=$false)]
-    [string] $appVersion = ""
+    [int] $appBuild = 0,
+    [Parameter(Mandatory=$false)]
+    [int] $appRevision = 0
 )
-
-if ($appVersion) {
-    Write-Host "Set BuildNumber = $appVersion"
-    write-host "##vso[build.updatebuildnumber]$appVersion" 
-}
 
 $buildArtifactFolder = $ENV:BUILD_ARTIFACTSTAGINGDIRECTORY
 $baseFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
-. (Join-Path $PSScriptRoot "Read-Settings.ps1") -local -version $version
+. (Join-Path $PSScriptRoot "Read-Settings.ps1") -version $version
 
 $params = @{}
 $insiderSasToken = "$ENV:insiderSasToken"
@@ -56,7 +53,7 @@ Run-AlPipeline @params `
     -enablePerTenantExtensionCop:$enablePerTenantExtensionCop `
     -buildArtifactFolder $buildArtifactFolder `
     -CreateRuntimePackages `
-    -appVersion $appVersion
+    -appBuild $appBuild -appRevision $appRevision
 
 if (Test-Path $testResultsFile) {
     Write-Host "##vso[task.setvariable variable=TestResultsAvailable]True"

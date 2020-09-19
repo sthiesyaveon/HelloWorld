@@ -52,6 +52,9 @@ else {
     $containerName = $pipelineName.Replace('.','-') -replace '[^a-zA-Z0-9---]', ''
 }
 Write-Host "Set containerName = $containerName"
+if (!$local) {
+    Write-Host "##vso[task.setvariable variable=containerName]$containerName"
+}
 
 "installApps", "appFolders", "testFolders", "memoryLimit" | ForEach-Object {
     $str = ""
