@@ -11,11 +11,11 @@
     "enableAppSourceCop":  false,
     "enablePerTenantExtensionCop":  false,
     "enableUICop":  false,
-    "bcContainerHelperVersion": "https://github.com/microsoft/navcontainerhelper/archive/dev.zip",
+    "bcContainerHelperVersion": "latest",
     "versions":  [
                      {
                          "version":  "current",
-                         "artifact":  "bcartifacts/sandbox/16.5.15897.16301/us/Latest",
+                         "artifact":  "///us/Current",
                          "signapp":  false
                      },
                      {

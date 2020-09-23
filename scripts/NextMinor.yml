@@ -9,7 +9,7 @@ schedules:
   always: true
 
 pool:
-  name: default
+  vmImage: 'windows-latest'
 
 variables:
 - group: BuildVariables
