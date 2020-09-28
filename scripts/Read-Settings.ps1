@@ -39,11 +39,14 @@ Write-Host "Set pipelineName = $pipelineName"
 
 if ($local -or ("$AgentName" -ne "Hosted Agent" -and "$AgentName" -notlike "Azure Pipelines*")) {
     $imageName = "bcimage"
+    Write-Host "Set imageName = $imageName"
+    if (!$local) {
+        Write-Host "##vso[task.setvariable variable=imageName]$imageName"
+    }
 }
 else {
     $imageName = ""
 }
-Write-Host "Set imageName = $imageName"
 
 if ($agentName) {
     $containerName = "$($agentName -replace '[^a-zA-Z0-9---]', '')-$($pipelineName -replace '[^a-zA-Z0-9---]', '')"
