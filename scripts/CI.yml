@@ -50,7 +50,7 @@ jobs:
     displayName: 'Publish Test Results'
     condition: and(succeeded(),eq(variables['TestResultsAvailable'],'True'))
     inputs:
-      testResultsFormat: XUnit
+      testResultsFormat: JUnit
       testResultsFiles: TestResults.xml
       failTaskOnFailedTests: true
   

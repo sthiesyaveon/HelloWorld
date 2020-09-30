@@ -37,15 +37,9 @@ else {
 $pipelineName = "$($settings.Name)-$version"
 Write-Host "Set pipelineName = $pipelineName"
 
+$imageName = ""
 if ($local -or ("$AgentName" -ne "Hosted Agent" -and "$AgentName" -notlike "Azure Pipelines*")) {
     $imageName = "bcimage"
-    Write-Host "Set imageName = $imageName"
-    if (!$local) {
-        Write-Host "##vso[task.setvariable variable=imageName]$imageName"
-    }
-}
-else {
-    $imageName = ""
 }
 
 if ($agentName) {

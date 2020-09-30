@@ -17,6 +17,7 @@ $baseFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
 Run-AlPipeline `
     -pipelineName $pipelineName `
     -containerName $containerName `
+    -imageName $imageName `
     -artifact $artifact.replace('{INSIDERSASTOKEN}',$insiderSasToken) `
     -memoryLimit $memoryLimit `
     -credential $credential `
@@ -25,6 +26,7 @@ Run-AlPipeline `
     -installApps $installApps `
     -appFolders $appFolders `
     -testFolders $testFolders `
+    -testResultsFormat 'JUnit' `
     -installTestFramework:$installTestFramework `
     -installTestLibraries:$installTestLibraries `
     -installPerformanceToolkit:$installPerformanceToolkit `

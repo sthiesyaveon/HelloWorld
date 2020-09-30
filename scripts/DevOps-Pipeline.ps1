@@ -36,6 +36,7 @@ if (Test-Path $testResultsFile) {
 Run-AlPipeline @params `
     -pipelinename $pipelineName `
     -containerName $containerName `
+    -imageName $imageName `
     -artifact $artifact.replace('{INSIDERSASTOKEN}',$insiderSasToken) `
     -memoryLimit $memoryLimit `
     -baseFolder $baseFolder `
@@ -44,6 +45,7 @@ Run-AlPipeline @params `
     -appFolders $appFolders `
     -testFolders $testFolders `
     -testResultsFile $testResultsFile `
+    -testResultsFormat 'JUnit' `
     -installTestFramework:$installTestFramework `
     -installTestLibraries:$installTestLibraries `
     -installPerformanceToolkit:$installPerformanceToolkit `
