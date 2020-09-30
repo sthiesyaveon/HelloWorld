@@ -11,7 +11,7 @@
     "enableAppSourceCop":  false,
     "enablePerTenantExtensionCop":  false,
     "enableUICop":  false,
-    "bcContainerHelperVersion": "latest",
+    "bcContainerHelperVersion": "preview",
     "versions":  [
                      {
                          "version":  "current",
