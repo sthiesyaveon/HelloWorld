@@ -70,3 +70,8 @@ if (!$local) {
     Write-Host "Set $_ = $str"
     Set-Variable -Name $_ -Value ($str -eq "True")
 }
+
+if ($settings.PSObject.Properties.Name -eq "genericImageName") {
+    Import-Module BcContainerHelper -DisableNameChecking
+    $bcContainerHelperConfig.genericImageName = $settings.genericImageName
+}
