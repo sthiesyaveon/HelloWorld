@@ -24,6 +24,7 @@ Run-AlPipeline `
     -baseFolder $baseFolder `
     -licenseFile $licenseFile `
     -installApps $installApps `
+    -previousApps $previousApps `
     -appFolders $appFolders `
     -testFolders $testFolders `
     -testResultsFormat 'JUnit' `
@@ -34,4 +35,6 @@ Run-AlPipeline `
     -enableAppSourceCop:$enableAppSourceCop `
     -enablePerTenantExtensionCop:$enablePerTenantExtensionCop `
     -enableUICop:$enableUICop `
+    -AppSourceCopMandatoryAffixes $appSourceCopMandatoryAffixes `
+    -AppSourceCopSupportedCountries $appSourceCopSupportedCountries `
     -useDevEndpoint -updateLaunchJson "Local Sandbox" -keepContainer
