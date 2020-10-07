@@ -12,7 +12,7 @@
     "enableAppSourceCop":  false,
     "enablePerTenantExtensionCop":  true,
     "enableUICop":  true,
-    "bcContainerHelperVersion": "latest",
+    "bcContainerHelperVersion": "preview",
     "versions":  [
                      {
                          "version":  "current",
