@@ -10,6 +10,9 @@ $replaceValues = @{
     "Default Base App Name" = "My Base App"
     "Default Test App Name" = "My Test App"
     "2.0.0.0" = "1.0.0.0"
+    "https://businesscentralapps.azureedge.net/helloworld/latest/apps.zip" = ""
+    "hw_" = "hw_"
+    "dk,us" = "dk,us"
 }
 
 function ReplaceProperty { Param ($object, $property)
@@ -23,7 +26,7 @@ function ReplaceProperty { Param ($object, $property)
 }
 
 function ReplaceObject { Param($object)
-    "id", "appId", "name", "publisher", "version" | ForEach-Object {
+    "id", "appId", "name", "publisher", "version", "previousApps", "appSourceCopMandatoryAffixes", "appSourceCopSupportedCountries" | ForEach-Object {
         ReplaceProperty -object $object -property $_
     }
 }
@@ -41,5 +44,5 @@ Get-ChildItem -Path $path | Where-Object { $_.psIsContainer -and $_.Name -notlik
 $settingsFile = Join-Path $PSScriptRoot "settings.json"
 $settings = Get-Content $settingsFile | ConvertFrom-Json
 Write-Host -ForegroundColor Yellow $settingsFile
-ReplaceProperty -object $settings -property "name"
+ReplaceObject -object $settings
 $settings | ConvertTo-Json -Depth 10 | Set-Content $settingsFile
