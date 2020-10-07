@@ -2,6 +2,7 @@
     "name":  "HelloWorld",
     "memoryLimit":  "6G",
     "installApps":  "",
+    "previousApps": "https://businesscentralapps.azureedge.net/helloworld/latest/apps.zip",
     "appFolders":  "app,base",
     "testFolders":  "test",
     "installTestFramework":  true,
@@ -9,8 +10,8 @@
     "installPerformanceToolkit":  false,
     "enableCodeCop":  false,
     "enableAppSourceCop":  false,
-    "enablePerTenantExtensionCop":  false,
-    "enableUICop":  false,
+    "enablePerTenantExtensionCop":  true,
+    "enableUICop":  true,
     "bcContainerHelperVersion": "latest",
     "versions":  [
                      {

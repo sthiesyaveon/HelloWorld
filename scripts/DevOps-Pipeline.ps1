@@ -42,6 +42,7 @@ Run-AlPipeline @params `
     -baseFolder $baseFolder `
     -licenseFile $LicenseFile `
     -installApps $installApps `
+    -previousApps $previousApps `
     -appFolders $appFolders `
     -testFolders $testFolders `
     -testResultsFile $testResultsFile `
@@ -50,9 +51,11 @@ Run-AlPipeline @params `
     -installTestLibraries:$installTestLibraries `
     -installPerformanceToolkit:$installPerformanceToolkit `
     -enableCodeCop:$enableCodeCop `
-    -enableUICop:$enableUICop `
     -enableAppSourceCop:$enableAppSourceCop `
     -enablePerTenantExtensionCop:$enablePerTenantExtensionCop `
+    -enableUICop:$enableUICop `
+    -AppSourceCopMandatoryAffixes $appSourceCopMandatoryAffixes `
+    -AppSourceCopSupportedCountries $appSourceCopSupportedCountries `
     -buildArtifactFolder $buildArtifactFolder `
     -CreateRuntimePackages `
     -appBuild $appBuild -appRevision $appRevision
