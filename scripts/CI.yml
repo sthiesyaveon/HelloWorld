@@ -2,17 +2,18 @@ trigger:
 - master
 
 pool:
-  vmImage: 'windows-latest'
+  name: 'default'
 
 variables:
 - group: BuildVariables
 
 jobs:
 - job: Build
+  timeoutInMinutes: 300
   variables:
     build.clean: all
     platform: x64
-    version: 'current'
+    version: 'ci'
     appVersion: '2.0'
     appBuild: $(Build.BuildID)
     appRevision: 0
@@ -25,13 +26,6 @@ jobs:
     inputs:
       targetType: inline
       script: 'Write-Host "##vso[build.updatebuildnumber]$(appVersion).$(appBuild).$(appRevision)"'
-
-  - task: PowerShell@2
-    displayName: 'Install BcContainerHelper'
-    inputs:
-      targetType: filePath
-      filePath: 'scripts\Install-BcContainerHelper.ps1'
-      failOnStderr: true
 
   - task: PowerShell@2
     displayName: 'Run Pipeline'
@@ -48,12 +42,12 @@ jobs:
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
-    condition: and(succeeded(),eq(variables['TestResultsAvailable'],'True'))
+    condition: and(succeeded(),ne(variables['TestResults'],''))
     inputs:
       testResultsFormat: JUnit
-      testResultsFiles: TestResults.xml
+      testResultsFiles: '$(testResults)'
       failTaskOnFailedTests: true
-  
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifacts'
     inputs:
@@ -64,6 +58,6 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
     inputs:
-      targetType: inline
-      script: 'Remove-BcContainer -containerName $(containerName); Flush-ContainerHelperCache -KeepDays 7'
+      targetType: filePath
+      filePath: 'scripts\Cleanup.ps1'
       failOnStderr: false

@@ -9,13 +9,14 @@ schedules:
   always: true
 
 pool:
-  vmImage: 'windows-latest'
+  name: 'default'
 
 variables:
 - group: BuildVariables
 
 jobs:
 - job: Build
+  timeoutInMinutes: 300
   variables:
     build.clean: all
     platform: x64
@@ -26,13 +27,6 @@ jobs:
     skipComponentGovernanceDetection: True
 
   steps:
-  - task: PowerShell@2
-    displayName: 'Install BcContainerHelper'
-    inputs:
-      targetType: filePath
-      filePath: 'scripts\Install-BcContainerHelper.ps1'
-      failOnStderr: true
-
   - task: PowerShell@2
     displayName: 'Run Pipeline'
     env:
@@ -48,16 +42,16 @@ jobs:
 
   - task: PublishTestResults@2
     displayName: 'Publish Test Results'
-    condition: and(succeeded(),eq(variables['TestResultsAvailable'],'True'))
+    condition: and(succeeded(),ne(variables['TestResults'],''))
     inputs:
       testResultsFormat: JUnit
-      testResultsFiles: TestResults.xml
+      testResultsFiles: '$(testResults)'
       failTaskOnFailedTests: true
   
   - task: PowerShell@2
     displayName: 'Cleanup'
     condition: always()
     inputs:
-      targetType: inline
-      script: 'Remove-BcContainer -containerName $(containerName); Flush-ContainerHelperCache -KeepDays 7'
+      targetType: filePath
+      filePath: 'scripts\Cleanup.ps1'
       failOnStderr: false

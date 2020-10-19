@@ -1,8 +1,6 @@
 Param(
     [switch] $local,
-
-    [Parameter(Mandatory=$true)]
-    [string] $version
+    [string] $version = ""
 )
 
 $agentName = ""
@@ -20,15 +18,6 @@ $buildversion = $settings.versions | Where-Object { $_.version -eq $version }
 if ($buildversion) {
     Write-Host "Set artifact = $($buildVersion.artifact)"
     Set-Variable -Name "artifact" -Value $buildVersion.artifact
-
-    if ($buildversion.PSObject.Properties.Name -eq "signapp") {
-        $signapp = $buildversion.signapp
-    }
-    else {
-        $signapp = $true
-    }
-    Write-Host "Set signapp = $signapp"
-    Set-Variable -Name "signapp" -Value $signapp
 }
 else {
     throw "Unknown version: $version"
@@ -37,41 +26,42 @@ else {
 $pipelineName = "$($settings.Name)-$version"
 Write-Host "Set pipelineName = $pipelineName"
 
-$imageName = ""
-if ($local -or ("$AgentName" -ne "Hosted Agent" -and "$AgentName" -notlike "Azure Pipelines*")) {
-    $imageName = "bcimage"
-}
-
 if ($agentName) {
-    $containerName = "$($agentName -replace '[^a-zA-Z0-9---]', '')-$($pipelineName -replace '[^a-zA-Z0-9---]', '')"
+    $containerName = "$($agentName -replace '[^a-zA-Z0-9---]', '')-$($pipelineName -replace '[^a-zA-Z0-9---]', '')".ToLowerInvariant()
 }
 else {
-    $containerName = $pipelineName.Replace('.','-') -replace '[^a-zA-Z0-9---]', ''
+    $containerName = "$($pipelineName.Replace('.','-') -replace '[^a-zA-Z0-9---]', '')".ToLowerInvariant()
 }
 Write-Host "Set containerName = $containerName"
 if (!$local) {
     Write-Host "##vso[task.setvariable variable=containerName]$containerName"
 }
 
-"installApps", "previousApps", "appSourceCopMandatoryAffixes", "appSourceCopSupportedCountries","appFolders", "testFolders", "memoryLimit" | ForEach-Object {
+"installApps", "previousApps", "appSourceCopMandatoryAffixes", "appSourceCopSupportedCountries","appFolders", "testFolders", "memoryLimit","additionalCountries" | ForEach-Object {
     $str = ""
-    if ($settings.PSObject.Properties.Name -eq $_) {
+    if ($buildversion.PSObject.Properties.Name -eq $_) {
+        $str = $buildversion."$_"
+    }
+    elseif ($settings.PSObject.Properties.Name -eq $_) {
         $str = $settings."$_"
     }
-    Write-Host "Set $_ = $str"
-    Set-Variable -Name $_ -Value $str
+    Write-Host "Set $_ = '$str'"
+    Set-Variable -Name $_ -Value "$str"
 }
 
-"installTestFramework", "installTestLibraries", "installPerformanceToolkit", "enableCodeCop", "enableAppSourceCop", "enablePerTenantExtensionCop", "enableUICop" | ForEach-Object {
+"installTestFramework", "installTestLibraries", "installPerformanceToolkit", "enableCodeCop", "enableAppSourceCop", "enablePerTenantExtensionCop", "enableUICop","doNotSignApp","doNotRunTests","cacheImage" | ForEach-Object {
     $str = "False"
-    if ($settings.PSObject.Properties.Name -eq $_) {
+    if ($buildversion.PSObject.Properties.Name -eq $_) {
+        $str = $buildversion."$_"
+    }
+    elseif ($settings.PSObject.Properties.Name -eq $_) {
         $str = $settings."$_"
     }
     Write-Host "Set $_ = $str"
     Set-Variable -Name $_ -Value ($str -eq "True")
 }
 
-if ($settings.PSObject.Properties.Name -eq "genericImageName") {
-    Import-Module BcContainerHelper -DisableNameChecking
-    $bcContainerHelperConfig.genericImageName = $settings.genericImageName
+$imageName = ""
+if ($cacheImage -and ("$AgentName" -ne "Hosted Agent" -and "$AgentName" -notlike "Azure Pipelines*")) {
+    $imageName = "bcimage"
 }

@@ -3,6 +3,8 @@
     [string] $version = "Current"
 )
 
+. (Get-Item "C:\Users\freddyk\Documents\GitHub\Microsoft\navcontainerhelper\*ContainerHelper.ps1").FullName
+
 $vaultName = "BuildVariables"
 $licenseFileSecret = Get-AzKeyVaultSecret -VaultName $vaultName -Name "licenseFile"
 if ($licenseFileSecret) { $licenseFile = $licenseFileSecret.SecretValueText } else { $licenseFile = "" }

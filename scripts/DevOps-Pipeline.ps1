@@ -11,6 +11,17 @@ $buildArtifactFolder = $ENV:BUILD_ARTIFACTSTAGINGDIRECTORY
 $baseFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
 . (Join-Path $PSScriptRoot "Read-Settings.ps1") -version $version
 
+$bcContainerHelperVersion = "latest"
+if ($settings.PSObject.Properties.Name -eq 'bcContainerHelperVersion' -and $settings.bcContainerHelperVersion) {
+    $bcContainerHelperVersion = $settings.bcContainerHelperVersion
+}
+Write-Host "Use bcContainerHelper Version: $bcContainerHelperVersion"
+. (Join-Path $PSScriptRoot "Install-BcContainerHelper.ps1") -bcContainerHelperVersion $bcContainerHelperVersion
+
+if ($settings.PSObject.Properties.Name -eq "genericImageName") {
+    $bcContainerHelperConfig.genericImageName = $settings.genericImageName
+}
+
 $params = @{}
 $insiderSasToken = "$ENV:insiderSasToken"
 $licenseFile = "$ENV:licenseFile"
@@ -28,9 +39,11 @@ if ($signapp -and $codeSigncertPfxFile) {
     }
 }
 
+$allTestResults = "testresults*.xml"
 $testResultsFile = Join-Path $baseFolder "TestResults.xml"
-if (Test-Path $testResultsFile) {
-    Remove-Item $testResultsFile -Force
+$testResultsFiles = Join-Path $baseFolder $allTestResults
+if (Test-Path $testResultsFiles) {
+    Remove-Item $testResultsFiles -Force
 }
 
 Run-AlPipeline @params `
@@ -45,6 +58,7 @@ Run-AlPipeline @params `
     -previousApps $previousApps `
     -appFolders $appFolders `
     -testFolders $testFolders `
+    -doNotRunTests:$doNotRunTests `
     -testResultsFile $testResultsFile `
     -testResultsFormat 'JUnit' `
     -installTestFramework:$installTestFramework `
@@ -58,9 +72,8 @@ Run-AlPipeline @params `
     -AppSourceCopSupportedCountries $appSourceCopSupportedCountries `
     -buildArtifactFolder $buildArtifactFolder `
     -CreateRuntimePackages `
+    -additionalCountries $additionalCountries `
     -appBuild $appBuild -appRevision $appRevision
 
-if (Test-Path $testResultsFile) {
-    Write-Host "##vso[task.setvariable variable=TestResultsAvailable]True"
-}
+Write-Host "##vso[task.setvariable variable=TestResults]$allTestResults"
 

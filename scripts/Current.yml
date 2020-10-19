@@ -20,13 +20,20 @@ jobs:
   variables:
     build.clean: all
     platform: x64
-    version: "nextminor"
-    appBuild: 2147483647
+    version: 'current'
+    appVersion: '2.0'
+    appBuild: $(Build.BuildID)
     appRevision: 0
     createRuntimePackages: True
     skipComponentGovernanceDetection: True
 
   steps:
+  - task: PowerShell@2
+    displayName: 'Set BuildNumber'
+    inputs:
+      targetType: inline
+      script: 'Write-Host "##vso[build.updatebuildnumber]$(appVersion).$(appBuild).$(appRevision)"'
+
   - task: PowerShell@2
     displayName: 'Run Pipeline'
     env:
@@ -47,7 +54,13 @@ jobs:
       testResultsFormat: JUnit
       testResultsFiles: '$(testResults)'
       failTaskOnFailedTests: true
-  
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: output
+
   - task: PowerShell@2
     displayName: 'Cleanup'
     condition: always()
