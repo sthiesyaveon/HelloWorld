@@ -23,16 +23,15 @@
         },
         {
             "version": "current",
-            "artifact": "///us/Current",
-            "cacheImage": false
+            "artifact": "///us/Current"
         },
         {
             "version": "nextmajor",
-            "artifact": "///us/NextMajor/{INSIDERSASTOKEN}",
+            "artifact": "///us/NextMajor/{INSIDERSASTOKEN}"
         },
         {
             "version": "nextminor",
-            "artifact": "///us/NextMinor/{INSIDERSASTOKEN}",
+            "artifact": "///us/NextMinor/{INSIDERSASTOKEN}"
         }
     ]
 }
