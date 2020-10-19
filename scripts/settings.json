@@ -13,7 +13,7 @@
     "enableAppSourceCop": false,
     "enablePerTenantExtensionCop": true,
     "enableUICop": true,
-    "bcContainerHelperVersion": "https://github.com/microsoft/navcontainerhelper/archive/dev.zip",
+    "bcContainerHelperVersion": "preview",
     "additionalCountries": "",
     "versions": [
         {

@@ -29,7 +29,6 @@ try {
     }
     else {
         Remove-Module -Name BcContainerHelper -Force -ErrorAction SilentlyContinue
-        $bcContainerHelperVersion = "latest"
         if ($bcContainerHelperVersion -eq "preview") {
             Write-Host "Determine latest BcContainerHelper preview version"
             $latestVersion = (Find-Module -Name bccontainerhelper -AllowPrerelease).Version
