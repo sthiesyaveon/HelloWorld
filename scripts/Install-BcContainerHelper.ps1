@@ -15,6 +15,19 @@ try {
     catch [System.Threading.AbandonedMutexException] {
        Write-Host "Other process terminated abnormally"
     }
+
+    $bcContainerHelperVersion = $bcContainerHelperVersion.Replace('{HOME}',$HOME.TrimEnd('\'))
+
+    if ($bcContainerHelperVersion -like "?:\*" -and (Test-Path $bcContainerHelperVersion)) {
+        $bch = Get-Item (Join-Path $bcContainerHelperVersion '*ContainerHelper.ps1')
+        if ($bch) {
+            Write-Host "Using $bch"
+            . "$bch"
+            return
+        }
+        $bcContainerHelperVersion = "https://github.com/microsoft/navcontainerhelper/archive/dev.zip"
+    }
+
     if ($bcContainerHelperVersion -like "https://*") {
         Remove-Module BcContainerHelper -ErrorAction SilentlyContinue
         $tempName = Join-Path $env:TEMP $containerName

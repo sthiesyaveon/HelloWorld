@@ -18,8 +18,8 @@ if ($settings.PSObject.Properties.Name -eq 'bcContainerHelperVersion' -and $sett
 Write-Host "Use bcContainerHelper Version: $bcContainerHelperVersion"
 . (Join-Path $PSScriptRoot "Install-BcContainerHelper.ps1") -bcContainerHelperVersion $bcContainerHelperVersion
 
-if ($settings.PSObject.Properties.Name -eq "genericImageName") {
-    $bcContainerHelperConfig.genericImageName = $settings.genericImageName
+if ($genericImageName) {
+    $bcContainerHelperConfig.genericImageName = $genericImageName
 }
 
 $params = @{}
@@ -70,9 +70,9 @@ Run-AlPipeline @params `
     -enableUICop:$enableUICop `
     -AppSourceCopMandatoryAffixes $appSourceCopMandatoryAffixes `
     -AppSourceCopSupportedCountries $appSourceCopSupportedCountries `
+    -additionalCountries $additionalCountries `
     -buildArtifactFolder $buildArtifactFolder `
     -CreateRuntimePackages `
-    -additionalCountries $additionalCountries `
     -appBuild $appBuild -appRevision $appRevision
 
 Write-Host "##vso[task.setvariable variable=TestResults]$allTestResults"

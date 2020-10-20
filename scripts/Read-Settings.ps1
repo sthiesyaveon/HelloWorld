@@ -37,7 +37,7 @@ if (!$local) {
     Write-Host "##vso[task.setvariable variable=containerName]$containerName"
 }
 
-"installApps", "previousApps", "appSourceCopMandatoryAffixes", "appSourceCopSupportedCountries","appFolders", "testFolders", "memoryLimit","additionalCountries" | ForEach-Object {
+"installApps", "previousApps", "appSourceCopMandatoryAffixes", "appSourceCopSupportedCountries","appFolders", "testFolders", "memoryLimit","additionalCountries","genericImageName" | ForEach-Object {
     $str = ""
     if ($buildversion.PSObject.Properties.Name -eq $_) {
         $str = $buildversion."$_"

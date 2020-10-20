@@ -1,10 +1,6 @@
 ﻿Param(
     [Parameter(Mandatory=$false)]
-    [string] $version = "ci",
-    [Parameter(Mandatory=$false)]
-    [int] $appBuild = ([int32]::MaxValue),
-    [Parameter(Mandatory=$false)]
-    [int] $appRevision = 0
+    [string] $version = "ci"
 )
 
 $baseFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
@@ -45,21 +41,15 @@ Run-AlPipeline `
     -baseFolder $baseFolder `
     -licenseFile $licenseFile `
     -installApps $installApps `
-    -previousApps $previousApps `
     -appFolders $appFolders `
     -testFolders $testFolders `
-    -doNotRunTests:$doNotRunTests `
     -testResultsFile $testResultsFile `
     -testResultsFormat 'JUnit' `
     -installTestFramework:$installTestFramework `
     -installTestLibraries:$installTestLibraries `
     -installPerformanceToolkit:$installPerformanceToolkit `
-    -enableCodeCop:$enableCodeCop `
-    -enableAppSourceCop:$enableAppSourceCop `
-    -enablePerTenantExtensionCop:$enablePerTenantExtensionCop `
-    -enableUICop:$enableUICop `
-    -AppSourceCopMandatoryAffixes $appSourceCopMandatoryAffixes `
-    -AppSourceCopSupportedCountries $appSourceCopSupportedCountries `
-    -additionalCountries $additionalCountries `
     -credential $credential `
-    -appBuild $appBuild -appRevision $appRevision
+    -doNotRunTests `
+    -useDevEndpoint `
+    -updateLaunchJson "Local Sandbox" `
+    -keepContainer
