@@ -16,7 +16,10 @@ try {
        Write-Host "Other process terminated abnormally"
     }
 
+    Write-Host "$bccontainerhelperversion"
     $bcContainerHelperVersion = $bcContainerHelperVersion.Replace('{HOME}',$HOME.TrimEnd('\'))
+    Write-Host "$bccontainerhelperversion"
+    Write-Host "$HOME"
 
     if ($bcContainerHelperVersion -like "?:\*" -and (Test-Path $bcContainerHelperVersion)) {
         $bch = Get-Item (Join-Path $bcContainerHelperVersion '*ContainerHelper.ps1')
