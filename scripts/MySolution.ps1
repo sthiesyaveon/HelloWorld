@@ -1,9 +1,10 @@
 ﻿$path = Join-Path $PSScriptRoot ".."
 
 $replaceObjectIds = @{
-    "70074169" = 70075169
-    "70074170" = 70075170
-    "70074218" = 70075218
+    "50130" = 80130
+    "50101" = 80101
+    "50100" = 80100
+    "50149" = 80149
 }
 $replaceValues = @{
     "00000000-0000-0000-0000-000000000001" = [Guid]::NewGuid().ToString()
@@ -15,9 +16,7 @@ $replaceValues = @{
     "Default Base App Name" = "My Base App"
     "Default Test App Name" = "My Test App"
     "2.0.0.0" = "1.0.0.0"
-    "https://businesscentralapps.azureedge.net/helloworld-appsource/latest/apps.zip" = ""
-    "hw_" = "hw_"
-    "dk,us" = "dk,us"
+    "https://businesscentralapps.azureedge.net/helloworld/latest/apps.zip" = ""
 } + $replaceObjectIds
 
 function ReplaceProperty { Param ($object, $property)
