@@ -26,7 +26,7 @@ $params = @{}
 $insiderSasToken = "$ENV:insiderSasToken"
 $licenseFile = "$ENV:licenseFile"
 $codeSigncertPfxFile = "$ENV:CodeSignCertPfxFile"
-if ($signapp -and $codeSigncertPfxFile) {
+if (!$doNotSignApp -and $codeSigncertPfxFile) {
     if ("$ENV:CodeSignCertPfxPassword" -ne "") {
         $codeSignCertPfxPassword = try { "$ENV:CodeSignCertPfxPassword" | ConvertTo-SecureString } catch { ConvertTo-SecureString -String "$ENV:CodeSignCertPfxPassword" -AsPlainText -Force }
         $params = @{
