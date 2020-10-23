@@ -15,6 +15,7 @@
     "enableUICop": true,
     "bcContainerHelperVersion": "preview",
     "additionalCountries": "",
+    "vaultNameForLocal": "BuildVariables",
     "versions": [
         {
             "version": "ci",

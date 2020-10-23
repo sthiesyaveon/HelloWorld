@@ -17,13 +17,16 @@ if ($genericImageName) {
     $bcContainerHelperConfig.genericImageName = $genericImageName
 }
 
-$vaultName = "BuildVariables"
-$licenseFileSecret = Get-AzKeyVaultSecret -VaultName $vaultName -Name "licenseFile"
-if ($licenseFileSecret) { $licenseFile = $licenseFileSecret.SecretValueText } else { $licenseFile = "" }
-$insiderSasTokenSecret = Get-AzKeyVaultSecret -VaultName $vaultName -Name "insiderSasToken"
-if ($insiderSasTokenSecret) { $insiderSasToken = $insiderSasTokenSecret.SecretValueText } else { $insiderSasToken = "" }
-$passwordSecret = Get-AzKeyVaultSecret -VaultName $vaultName -Name "password"
-if ($passwordSecret) { $credential = New-Object pscredential 'admin', $passwordSecret.SecretValue } else { $credential = $null }
+if (("$vaultNameForLocal" -eq "") -or !(Get-AzKeyVault -VaultName $vaultNameForLocal)) {
+    throw "You need to setup a Key Vault for use with local pipelines"
+}
+Get-AzKeyVaultSecret -VaultName $vaultNameForLocal | ForEach-Object {
+    Write-Host "Get Secret $($_.Name)Secret"
+    Set-Variable -Name "$($_.Name)Secret" -Value (Get-AzKeyVaultSecret -VaultName $vaultNameForLocal -Name $_.Name)
+}
+$licenseFile = $licenseFileSecret.SecretValueText
+$insiderSasToken = $insiderSasTokenSecret.SecretValueText
+$credential = New-Object pscredential 'admin', $passwordSecret.SecretValue
 
 $allTestResults = "testresults*.xml"
 $testResultsFile = Join-Path $baseFolder "TestResults.xml"
