@@ -8,7 +8,7 @@ if ("$AgentName" -ne "Hosted Agent" -and "$AgentName" -notlike "Azure Pipelines*
         try {
             if (!$cleanupMutex.WaitOne(1000)) {
                 Write-Host "Waiting for other process to finish cleanup"
-                $buildMutex.WaitOne() | Out-Null
+                $cleanupMutex.WaitOne() | Out-Null
                 Write-Host "Other process completed"
             }
         }
