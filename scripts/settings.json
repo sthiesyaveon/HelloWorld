@@ -20,11 +20,13 @@
         {
             "version": "ci",
             "artifact": "//17.0.17126.17791/us",
-            "cacheImage": true
+            "cacheImage": true,
+            "CreateRuntimePackages": true
         },
         {
             "version": "current",
-            "artifact": "///us/Current"
+            "artifact": "///us/Current",
+            "CreateRuntimePackages": true
         },
         {
             "version": "nextmajor",

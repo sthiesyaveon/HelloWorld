@@ -62,7 +62,7 @@ Run-AlPipeline @params `
     -AppSourceCopSupportedCountries $appSourceCopSupportedCountries `
     -additionalCountries $additionalCountries `
     -buildArtifactFolder $buildArtifactFolder `
-    -CreateRuntimePackages `
+    -CreateRuntimePackages:$CreateRuntimePackages `
     -appBuild $appBuild -appRevision $appRevision
 
 Write-Host "##vso[task.setvariable variable=TestResults]$allTestResults"

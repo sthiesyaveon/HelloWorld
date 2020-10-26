@@ -49,7 +49,7 @@ if (!$local) {
     Set-Variable -Name $_ -Value "$str"
 }
 
-"installTestFramework", "installTestLibraries", "installPerformanceToolkit", "enableCodeCop", "enableAppSourceCop", "enablePerTenantExtensionCop", "enableUICop", "doNotSignApps", "doNotRunTests", "cacheImage" | ForEach-Object {
+"installTestFramework", "installTestLibraries", "installPerformanceToolkit", "enableCodeCop", "enableAppSourceCop", "enablePerTenantExtensionCop", "enableUICop", "doNotSignApps", "doNotRunTests", "cacheImage", "CreateRuntimePackages" | ForEach-Object {
     $str = "False"
     if ($buildversion.PSObject.Properties.Name -eq $_) {
         $str = $buildversion."$_"
