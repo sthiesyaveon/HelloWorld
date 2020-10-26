@@ -8,7 +8,7 @@
     "installTestFramework": true,
     "installTestLibraries": false,
     "installPerformanceToolkit": false,
-    "doNotSignApp": true,
+    "doNotSignApps": true,
     "enableCodeCop": false,
     "enableAppSourceCop": false,
     "enablePerTenantExtensionCop": true,
