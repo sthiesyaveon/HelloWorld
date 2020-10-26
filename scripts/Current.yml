@@ -9,7 +9,7 @@ schedules:
   always: true
 
 pool:
-  name: 'default'
+  vmImage: 'Windows-Latest'
 
 variables:
 - group: BuildVariables
@@ -24,7 +24,6 @@ jobs:
     appVersion: '2.0'
     appBuild: $(Build.BuildID)
     appRevision: 0
-    createRuntimePackages: True
     skipComponentGovernanceDetection: True
 
   steps:

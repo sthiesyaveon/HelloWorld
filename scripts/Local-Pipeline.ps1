@@ -9,27 +9,17 @@
 
 $baseFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
 . (Join-Path $PSScriptRoot "Read-Settings.ps1") -version $version
-
-$bcContainerHelperVersion = "latest"
-if ($settings.PSObject.Properties.Name -eq 'bcContainerHelperVersion' -and $settings.bcContainerHelperVersion) {
-    $bcContainerHelperVersion = $settings.bcContainerHelperVersion
-}
-Write-Host "Use bcContainerHelper Version: $bcContainerHelperVersion"
-. (Join-Path $PSScriptRoot "Install-BcContainerHelper.ps1") -bcContainerHelperVersion $bcContainerHelperVersion
-
-if ($genericImageName) {
-    $bcContainerHelperConfig.genericImageName = $genericImageName
-}
+. (Join-Path $PSScriptRoot "Install-BcContainerHelper.ps1") -bcContainerHelperVersion $bcContainerHelperVersion -genericImageName $genericImageName
 
 if (("$vaultNameForLocal" -eq "") -or !(Get-AzKeyVault -VaultName $vaultNameForLocal)) {
     throw "You need to setup a Key Vault for use with local pipelines"
 }
 Get-AzKeyVaultSecret -VaultName $vaultNameForLocal | ForEach-Object {
     Write-Host "Get Secret $($_.Name)Secret"
-    Set-Variable -Name "$($_.Name)Secret" -Value (Get-AzKeyVaultSecret -VaultName $vaultNameForLocal -Name $_.Name)
+    Set-Variable -Name "$($_.Name)Secret" -Value (Get-AzKeyVaultSecret -VaultName $vaultNameForLocal -Name $_.Name -WarningAction SilentlyContinue)
 }
-$licenseFile = $licenseFileSecret.SecretValueText
-$insiderSasToken = $insiderSasTokenSecret.SecretValueText
+$licenseFile = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFileSecret.SecretValue))
+$insiderSasToken = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($insiderSasTokenSecret.SecretValue))
 $credential = New-Object pscredential 'admin', $passwordSecret.SecretValue
 
 $allTestResults = "testresults*.xml"

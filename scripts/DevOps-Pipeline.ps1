@@ -10,17 +10,7 @@
 $buildArtifactFolder = $ENV:BUILD_ARTIFACTSTAGINGDIRECTORY
 $baseFolder = (Get-Item (Join-Path $PSScriptRoot "..")).FullName
 . (Join-Path $PSScriptRoot "Read-Settings.ps1") -version $version
-
-$bcContainerHelperVersion = "latest"
-if ($settings.PSObject.Properties.Name -eq 'bcContainerHelperVersion' -and $settings.bcContainerHelperVersion) {
-    $bcContainerHelperVersion = $settings.bcContainerHelperVersion
-}
-Write-Host "Use bcContainerHelper Version: $bcContainerHelperVersion"
-. (Join-Path $PSScriptRoot "Install-BcContainerHelper.ps1") -bcContainerHelperVersion $bcContainerHelperVersion
-
-if ($genericImageName) {
-    $bcContainerHelperConfig.genericImageName = $genericImageName
-}
+. (Join-Path $PSScriptRoot "Install-BcContainerHelper.ps1") -bcContainerHelperVersion $bcContainerHelperVersion -genericImageName $genericImageName
 
 $params = @{}
 $insiderSasToken = "$ENV:insiderSasToken"

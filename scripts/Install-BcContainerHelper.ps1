@@ -1,6 +1,12 @@
 ﻿Param(
-    [string] $bcContainerHelperVersion = "latest"
+    [string] $bcContainerHelperVersion = "",
+    [string] $genericImageName = ""
 )
+
+if ($bcContainerHelperVersion -eq "") {
+    $bcContainerHelperVersion = "latest"
+}
+Write-Host "Use bcContainerHelper Version: '$bcContainerHelperVersion'"
 
 $buildMutexName = "bcContainerHelper"
 $buildMutex = New-Object System.Threading.Mutex($false, $buildMutexName)
@@ -78,4 +84,8 @@ try {
 }
 finally {
     $buildMutex.ReleaseMutex()
+}
+
+if ($genericImageName) {
+    $bcContainerHelperConfig.genericImageName = $genericImageName
 }

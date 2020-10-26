@@ -9,7 +9,7 @@ schedules:
   always: true
 
 pool:
-  name: 'default'
+  vmImage: 'Windows-Latest'
 
 variables:
 - group: BuildVariables
@@ -23,7 +23,6 @@ jobs:
     version: "nextmajor"
     appBuild: 2147483647
     appRevision: 0
-    createRuntimePackages: True
     skipComponentGovernanceDetection: True
 
   steps:

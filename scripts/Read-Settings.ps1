@@ -37,7 +37,7 @@ if (!$local) {
     Write-Host "##vso[task.setvariable variable=containerName]$containerName"
 }
 
-"installApps", "previousApps", "appSourceCopMandatoryAffixes", "appSourceCopSupportedCountries","appFolders", "testFolders", "memoryLimit","additionalCountries","genericImageName","vaultNameForLocal" | ForEach-Object {
+"installApps", "previousApps", "appSourceCopMandatoryAffixes", "appSourceCopSupportedCountries", "appFolders", "testFolders", "memoryLimit", "additionalCountries", "genericImageName", "vaultNameForLocal", "bcContainerHelperVersion" | ForEach-Object {
     $str = ""
     if ($buildversion.PSObject.Properties.Name -eq $_) {
         $str = $buildversion."$_"
@@ -49,7 +49,7 @@ if (!$local) {
     Set-Variable -Name $_ -Value "$str"
 }
 
-"installTestFramework", "installTestLibraries", "installPerformanceToolkit", "enableCodeCop", "enableAppSourceCop", "enablePerTenantExtensionCop", "enableUICop","doNotSignApp","doNotRunTests","cacheImage" | ForEach-Object {
+"installTestFramework", "installTestLibraries", "installPerformanceToolkit", "enableCodeCop", "enableAppSourceCop", "enablePerTenantExtensionCop", "enableUICop", "doNotSignApp", "doNotRunTests", "cacheImage" | ForEach-Object {
     $str = "False"
     if ($buildversion.PSObject.Properties.Name -eq $_) {
         $str = $buildversion."$_"
