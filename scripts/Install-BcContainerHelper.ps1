@@ -35,6 +35,45 @@ try {
         $bcContainerHelperVersion = "https://github.com/microsoft/navcontainerhelper/archive/dev.zip"
     }
 
+    if ($bcContainerHelperVersion -notlike "https://*") {
+        try {
+            Remove-Module -Name BcContainerHelper -Force -ErrorAction SilentlyContinue
+            if ($bcContainerHelperVersion -eq "preview") {
+                Write-Host "Determine latest BcContainerHelper preview version"
+                $latestVersion = (Find-Module -Name bccontainerhelper -AllowPrerelease).Version
+                $bcContainerHelperVersion = $latestVersion.ToString()
+                 Write-Host "BcContainerHelper $bcContainerHelperVersion is the latest preview version"
+            }
+            elseif ($bcContainerHelperVersion -eq "latest") {
+                 Write-Host "Determine latest BcContainerHelper version"
+                 $latestVersion = (Find-Module -Name bccontainerhelper).Version
+                 $bcContainerHelperVersion = $latestVersion.ToString()
+                 Write-Host "BcContainerHelper $bcContainerHelperVersion is the latest version"
+            }
+            $modules = Get-InstalledModule -Name bccontainerhelper -ErrorAction SilentlyContinue -AllVersions -AllowPrerelease
+            if ($modules | Where-Object { $_.Version -eq $bcContainerHelperVersion }) {
+                if ($bcContainerHelperVersion -like "*preview*") {
+                    Import-Module -Name BcContainerHelper -DisableNameChecking
+                }
+                else {
+                    Import-Module -Name BcContainerHelper -RequiredVersion $bcContainerHelperVersion -DisableNameChecking
+                }
+            }
+            else {
+                if ($bcContainerHelperVersion -like "*preview*") {
+                    Install-Module -Name BcContainerHelper -AllowPrerelease -Force
+                    Import-Module -Name BcContainerHelper -Force -DisableNameChecking
+                }
+                else {
+                    Install-Module -Name BcContainerHelper -RequiredVersion $bcContainerHelperVersion -Force
+                    Import-Module -Name BcContainerHelper -RequiredVersion $bcContainerHelperVersion -Force -DisableNameChecking
+                }
+            }
+        }
+        catch {
+            $bcContainerHelperVersion = "https://github.com/microsoft/navcontainerhelper/archive/master.zip"
+        }
+    }
     if ($bcContainerHelperVersion -like "https://*") {
         Remove-Module BcContainerHelper -ErrorAction SilentlyContinue
         $tempName = Join-Path $env:TEMP $containerName
@@ -46,40 +85,6 @@ try {
         $modulePath = (Get-Item (Join-Path $tempName "*\BcContainerHelper.psm1")).FullName
         Write-Host $modulePath
         Import-Module $modulePath -DisableNameChecking
-    }
-    else {
-        Remove-Module -Name BcContainerHelper -Force -ErrorAction SilentlyContinue
-        if ($bcContainerHelperVersion -eq "preview") {
-            Write-Host "Determine latest BcContainerHelper preview version"
-            $latestVersion = (Find-Module -Name bccontainerhelper -AllowPrerelease).Version
-            $bcContainerHelperVersion = $latestVersion.ToString()
-             Write-Host "BcContainerHelper $bcContainerHelperVersion is the latest preview version"
-        }
-        elseif ($bcContainerHelperVersion -eq "latest") {
-             Write-Host "Determine latest BcContainerHelper version"
-             $latestVersion = (Find-Module -Name bccontainerhelper).Version
-             $bcContainerHelperVersion = $latestVersion.ToString()
-             Write-Host "BcContainerHelper $bcContainerHelperVersion is the latest version"
-        }
-        $modules = Get-InstalledModule -Name bccontainerhelper -ErrorAction SilentlyContinue -AllVersions -AllowPrerelease
-        if ($modules | Where-Object { $_.Version -eq $bcContainerHelperVersion }) {
-            if ($bcContainerHelperVersion -like "*preview*") {
-                Import-Module -Name BcContainerHelper -DisableNameChecking
-            }
-            else {
-                Import-Module -Name BcContainerHelper -RequiredVersion $bcContainerHelperVersion -DisableNameChecking
-            }
-        }
-        else {
-            if ($bcContainerHelperVersion -like "*preview*") {
-                Install-Module -Name BcContainerHelper -AllowPrerelease -Force
-                Import-Module -Name BcContainerHelper -Force -DisableNameChecking
-            }
-            else {
-                Install-Module -Name BcContainerHelper -RequiredVersion $bcContainerHelperVersion -Force
-                Import-Module -Name BcContainerHelper -RequiredVersion $bcContainerHelperVersion -Force -DisableNameChecking
-            }
-        }
     }
 }
 finally {
