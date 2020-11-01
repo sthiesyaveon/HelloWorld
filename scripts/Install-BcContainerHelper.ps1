@@ -25,7 +25,9 @@ else {
     elseif ($bccontainerHelperVersion -eq "preview") {
         $bccontainerHelperVersion = $previewVersion
     }
-    $path = Join-Path $env:ProgramFiles "WindowsPowerShell\Modules\BcContainerHelper\$bccontainerHelperVersion"
+    $basePath = Join-Path $env:ProgramFiles "WindowsPowerShell\Modules\BcContainerHelper"
+    if (!(Test-Path $basePath)) { New-Item $basePath -ItemType Directory | Out-Null }
+    $path = Join-Path $basePath $bccontainerHelperVersion
     $bccontainerHelperVersion = "$bcbaseurl/$bccontainerHelperVersion.zip"
 }
 
