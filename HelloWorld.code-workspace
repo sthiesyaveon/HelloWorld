@@ -13,10 +13,10 @@
 			"path": "scripts"
 		},
 		{
-			"path": ".azureDevOps"
+			"path": ".github"
 		},
 		{
-			"path": ".github"
+			"path": ".azureDevOps"
 		}
 	],
 	"settings": {}
