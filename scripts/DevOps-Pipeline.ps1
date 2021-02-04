@@ -113,7 +113,7 @@ Run-AlPipeline @params `
         $app.FullName
     }
     $installTestApps | % {
-        Publish-BcContainerApp -containerName $parameters.containerName -tenant $parameters.tenant -appFile $_ -sync -install
+        Publish-BcContainerApp -containerName $parameters.containerName -tenant $parameters.tenant -appFile ":$_" -sync -install
     }
 }
 
