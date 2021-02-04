@@ -100,7 +100,22 @@ Run-AlPipeline @params `
     -additionalCountries $additionalCountries `
     -buildArtifactFolder $buildArtifactFolder `
     -CreateRuntimePackages:$CreateRuntimePackages `
-    -appBuild $appBuild -appRevision $appRevision
+    -appBuild $appBuild -appRevision $appRevision -ImportTestToolkitToBcContainer { Param([Hashtable]$parameters)
+    Import-TestToolkitToBcContainer @parameters
+    $installTestApps = Invoke-ScriptInBcContainer -containerName $parameters.containername -scriptblock {
+        $app = Get-ChildItem -Path 'C:\Applications.*' -Filter '*Tests-General Journal*.app' -Recurse
+        if (!($app)) {
+            $app = Get-ChildItem -Path 'C:\Applications' -Filter '*Tests-General Journal*.app' -Recurse
+            if (!($app)) {
+                throw "Cannot find Tests-General Journal app"
+            }
+        }
+        $app.FullName
+    }
+    $installTestApps | % {
+        Publish-BcContainerApp -containerName $parameters.containerName -tenant $parameters.tenant -appFile $_ -sync -install
+    }
+}
 
 if ($environment -eq 'AzureDevOps') {
     Write-Host "##vso[task.setvariable variable=TestResults]$allTestResults"
