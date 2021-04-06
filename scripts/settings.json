@@ -2,6 +2,7 @@
     "name": "HelloWorld",
     "memoryLimit": "6G",
     "installApps": "",
+    "installTestApps": "",
     "previousApps": "https://businesscentralapps.azureedge.net/helloworld/latest/apps.zip",
     "appFolders": "app,base",
     "testFolders": "test",
@@ -20,7 +21,7 @@
     "versions": [
         {
             "version": "ci",
-            "artifact": "//17.0.17126.17791/us",
+            "artifact": "//18.0.23013.24016/us",
             "cacheImage": true,
             "CreateRuntimePackages": true
         },

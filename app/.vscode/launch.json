@@ -5,11 +5,21 @@
                                "type":  "al",
                                "request":  "launch",
                                "name":  "Local Sandbox",
-                               "server":  "http://helloworld-current",
+                               "server":  "http://bingmaps-ci",
                                "serverInstance":  "BC",
                                "port":  7049,
                                "tenant":  "default",
                                "authentication":  "UserPassword",
+                               "startupObjectId":  22,
+                               "startupObjectType":  "Page",
+                               "breakOnError":  true
+                           },
+                           {
+                               "type":  "al",
+                               "request":  "launch",
+                               "name":  "Cloud Sandbox",
+                               "environmentType":  "Sandbox",
+                               "environmentName":  "contoso",
                                "startupObjectId":  22,
                                "startupObjectType":  "Page",
                                "breakOnError":  true
