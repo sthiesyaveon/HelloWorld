@@ -20,7 +20,7 @@ Get-AzKeyVaultSecret -VaultName $vaultNameForLocal | ForEach-Object {
 $licenseFile = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($licenseFileSecret.SecretValue))
 $insiderSasToken = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($insiderSasTokenSecret.SecretValue))
 $credential = New-Object pscredential 'admin', $passwordSecret.SecretValue
-$refreshToken = $BcSaasRefreshTokenSecret.SecretValueText
+$refreshToken = $BcSaasRefreshTokenSecret.SecretValue | Get-PlainText
 $authContext = $null
 
 if ($refreshToken -and $environmentName) {
